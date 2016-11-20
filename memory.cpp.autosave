@@ -1,0 +1,133 @@
+#include "memory.h"
+
+memory::memory()
+{
+
+}
+
+/************************************************
+ * 
+ *          Register access functions
+ * 
+ ************************************************
+ */
+
+ADDR pdp::get_reg_addr(registers number) {
+    return MEM_SIZE + number * 2;
+}
+
+WORD pdp::get_reg_data(registers number) {
+    return memory[MEM_SIZE + number * 2];
+}
+
+/************************************************
+ *
+ *          Ram read and write functions
+ *
+ ************************************************
+ */
+
+
+bool pdp::b_write(ADDR adr, BYTE value) {
+    memory[adr] = value;
+    return true;
+}
+
+BYTE pdp::b_read(ADDR adr) {
+    return memory[adr];
+}
+
+bool pdp::w_write(ADDR adr, WORD value) {
+    if(adr % 2 != 0)
+        return false;
+
+    BYTE first_byte  = (BYTE)value,
+         second_byte = (BYTE)(value >> 8);
+
+    // TODO: check what Artem do
+
+    memory[adr] = first_byte;
+    memory[adr + 1] = second_byte;
+    return true;
+}
+
+WORD pdp::w_read(ADDR adr) {
+    if(adr % 2 != 0)
+        printf("w_read address is invalid\n");
+
+    WORD first_byte  = memory[adr],
+         second_byte = memory[adr + 1];
+    return (second_byte << 8) + first_byte;
+}
+
+/************************************************
+ *
+ *      Program status word access functions
+ *
+ ************************************************
+ */
+
+int pdp::get_C() {
+    return (memory[PSW] & FIRST_BIT_MASK);
+}
+
+bool pdp::set_C(int new_value) {
+    if(new_value != 0 && new_value != 1)
+        return false;
+
+    new_value += 0177776;
+    memory[PSW] |= new_value;
+    return true;
+}
+
+int pdp::get_V() {
+    return ((memory[PSW] >> 1) & FIRST_BIT_MASK);
+}
+
+bool pdp::set_V(int new_value) {
+    if(new_value != 0 && new_value != 1)
+        return false;
+
+    new_value = 0177775 + new_value * 2;
+    memory[PSW] |= new_value;
+    return true;
+}
+
+int pdp::get_Z() {
+    return ((memory[PSW] >> 2) & FIRST_BIT_MASK);
+}
+
+bool pdp::set_Z(int new_value) {
+    if(new_value != 0 && new_value != 1)
+        return false;
+
+    new_value = 0177773 + new_value * 4;
+    memory[PSW] |= new_value;
+    return true;
+}
+
+int pdp::get_N() {
+    return ((memory[PSW] >> 3) & FIRST_BIT_MASK);
+}
+
+bool pdp::set_N(int new_value) {
+    if(new_value != 0 && new_value != 1)
+        return false;
+
+    new_value = 0177767 + new_value * 8;
+    memory[PSW] |= new_value;
+    return true;
+}
+
+int pdp::get_T() {
+    return ((memory[PSW] >> 4) & FIRST_BIT_MASK);
+}
+
+bool pdp::set_T(int new_value) {
+    if(new_value != 0 && new_value != 1)
+        return false;
+
+    new_value = 0177757 + new_value * 16;
+    memory[PSW] |= new_value;
+    return true;
+}
