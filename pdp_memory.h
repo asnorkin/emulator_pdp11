@@ -64,6 +64,12 @@ public:
     bool    set_PSW_flag(int flag);
     bool    clr_PSW_flag(int flag);
 
+    //  Reset funcs
+    bool    reset();
+    bool    reset_VRAM();
+    bool    reset_RAM();
+    bool    reset_registers();
+
     BYTE *  get_RAM_snapshot();
     BYTE *  get_VRAM_snapshot();
     WORD *  get_registers_snapshot();

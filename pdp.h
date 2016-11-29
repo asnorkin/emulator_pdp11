@@ -29,9 +29,12 @@ private:
 public:
 
     pdp();
-    bool        load_program(char *filename);
-    int         run_program();
+    bool        load_program(char *filename);    
     pdp_status *run_next_instruction();
+    bool        reset();
+    //int         run_program();
+
+    //  Just for console debugging
     bool        print_next_instruction();
     bool        print_status();
 

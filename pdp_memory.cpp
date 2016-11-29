@@ -9,6 +9,42 @@ pdp_memory::pdp_memory()
 }
 
 
+bool pdp_memory::reset_VRAM() {
+    for(int i = 0; i < VRAM_SIZE; ++i)
+        VRAM[i] = 0;
+
+    return true;
+}
+
+
+bool pdp_memory::reset_RAM() {
+    for(int i = 0; i < RAM_SIZE; ++i)
+        RAM[i] = 0;
+
+    return true;
+}
+
+
+bool pdp_memory::reset_registers() {
+    for(int i = 0; i < REGISTERS_NUMBER * 2; ++i)
+        RAM[i + RAM_SIZE] = 0;
+}
+
+
+bool pdp_memory::reset() {
+     if(!reset_VRAM())
+         return false;
+
+     if(!reset_RAM())
+         return false;
+
+     if(!reset_registers())
+         return false;
+
+     return true;
+}
+
+
 BYTE *pdp_memory::get_RAM_snapshot() {
     BYTE *snapshot = (BYTE *)calloc(RAM_SIZE, sizeof(BYTE));
     if(!snapshot)

@@ -80,6 +80,9 @@ pdp_status *pdp::get_pdp_status() {
 
 
 bool pdp::load_program(char *filename) {
+    if(!reset())
+        return false;
+
     ifstream infile(filename);
 
     WORD init_addr = 0, n = 0;
@@ -90,6 +93,17 @@ bool pdp::load_program(char *filename) {
             memory->w_write(init_addr + 2 * i, x);
         }
     }
+
+    return true;
+}
+
+
+bool pdp::reset() {
+    if(!memory->reset())
+        return false;
+
+    if(!processor->reset())
+        return false;
 
     return true;
 }
