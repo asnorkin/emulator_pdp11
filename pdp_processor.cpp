@@ -1,9 +1,9 @@
 #include "pdp_processor.h"
-
 #include "pdp_memory.h"
 
 #include <cstdlib>
 #include <cstdio>
+
 
 #define CLEAR_MASK          0000000
 #define CLEARB_MASK         0177400
@@ -177,6 +177,7 @@ bool pdp_processor::parse_commands() {
     return true;
 }
 
+
 bool pdp_processor::init_get_op_array() {
     get_op[REGISTER]                =   &pdp_processor::get_reg_op;
     get_op[REGISTER_DEFERRED]       =   &pdp_processor::get_reg_def_op;
@@ -192,7 +193,6 @@ bool pdp_processor::init_get_op_array() {
 }
 
 
-
 void pdp_processor::get_reg_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
     if(reg_number == PC)
@@ -204,6 +204,7 @@ void pdp_processor::get_reg_op(WORD instr, int op_num) {
     operands[op_num].val = memory->get_reg_data(reg_number);
 }
 
+
 void pdp_processor::get_reg_def_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
     if(reg_number == PC)
@@ -214,6 +215,7 @@ void pdp_processor::get_reg_def_op(WORD instr, int op_num) {
     operands[op_num].adr = mem_addr;
     operands[op_num].val = memory->w_read(mem_addr);
 }
+
 
 void pdp_processor::get_autoinc_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
@@ -228,6 +230,7 @@ void pdp_processor::get_autoinc_op(WORD instr, int op_num) {
         memory->set_reg_data(reg_number, mem_addr + 2);
 }
 
+
 void pdp_processor::get_autoinc_def_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
     ADDR mem_addr  = memory->get_reg_data(reg_number);
@@ -237,6 +240,7 @@ void pdp_processor::get_autoinc_def_op(WORD instr, int op_num) {
 
     memory->set_reg_data(reg_number, mem_addr + 2);
 }
+
 
 void pdp_processor::get_autodec_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
@@ -255,6 +259,7 @@ void pdp_processor::get_autodec_op(WORD instr, int op_num) {
     operands[op_num].val = memory->w_read(mem_addr);
 }
 
+
 void pdp_processor::get_autodec_def_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
     if(reg_number == PC)
@@ -270,6 +275,7 @@ void pdp_processor::get_autodec_def_op(WORD instr, int op_num) {
     operands[op_num].val  = memory->w_read(operands[op_num].adr);
 }
 
+
 void pdp_processor::get_index_op(WORD instr, int op_num) {
     operands[NN].val = memory->w_read(memory->get_reg_data(PC));
     memory->set_reg_data(PC, memory->get_reg_data(PC) + 2);
@@ -281,6 +287,7 @@ void pdp_processor::get_index_op(WORD instr, int op_num) {
     operands[op_num].adr = mem_addr;
     operands[op_num].val = memory->w_read(mem_addr);
 }
+
 
 void pdp_processor::get_index_def_op(WORD instr, int op_num) {
     operands[NN].val = memory->w_read(memory->get_reg_data(PC));
@@ -294,11 +301,11 @@ void pdp_processor::get_index_def_op(WORD instr, int op_num) {
     operands[op_num].val = memory->w_read(operands[op_num].adr);
 }
 
+
 void pdp_processor::get_branch_op(WORD instr, int op_num) {
     operands[op_num].val = instr & OFFSET_MASK;
     operands[op_num].adr = 0;
 }
-
 
 
 pdp_processor::command pdp_processor::get_command(int index) {
@@ -309,6 +316,7 @@ pdp_processor::command pdp_processor::get_command(int index) {
 pdp_processor::com_processing pdp_processor::get_parsed_command(int index) {
     return parsed_commands[index];
 }
+
 
 //bool pdp_processor::reset_operands() {
 //    for(int i = 0; i < OPERANDS_NUMBER; ++i) {

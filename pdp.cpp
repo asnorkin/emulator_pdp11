@@ -73,7 +73,7 @@ pdp_status *pdp::run_next_instruction() {
 
 
 pdp_status *pdp::get_pdp_status() {
-    pdp_status *status = (pdp_status *)calloc(1, sizeof(pdp_status));
+    pdp_status *status = new pdp_status();
     if(!status)
         error_exit("Can't allocate memory for pdp status");
 
@@ -86,12 +86,12 @@ pdp_status *pdp::get_pdp_status() {
 }
 
 
-int pdp::run_program() {
+/*int pdp::run_program() {
 
 
 
     return 0;
-}
+}*/
 
 
 bool pdp::load_program(char *filename) {

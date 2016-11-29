@@ -5,6 +5,8 @@
 #include "pdp_memory.h"
 #include "data_types.h"
 
+using std::string;
+
 
 typedef struct pdp_status {
     WORD *  registers;
@@ -30,8 +32,10 @@ public:
 
     pdp();
     bool        load_program(char *filename);
-    int         run_program();
     pdp_status *run_next_instruction();
+    //int         run_program();
+
+    //  Just for debugging
     bool        print_next_instruction();
     bool        print_status();
 
