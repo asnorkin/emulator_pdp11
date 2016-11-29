@@ -806,7 +806,7 @@ void pdp_processor::ex_rtt() {
 }
 
 void pdp_processor::ex_halt() {
-    exit(EXIT_SUCCESS);
+    return;
 }
 
 void pdp_processor::ex_wait() {
