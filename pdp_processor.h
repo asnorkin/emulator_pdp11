@@ -153,6 +153,14 @@ private:
     bool    write_back();
 
 
+/*
+ *  Reset funcs
+ */
+    bool    reset();
+    bool    reset_operands();
+    bool    reset_if_byte_flag();
+    bool    reset_result();
+    bool    reset_curr_instr();
 
 
 /*

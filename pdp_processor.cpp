@@ -310,17 +310,51 @@ pdp_processor::com_processing pdp_processor::get_parsed_command(int index) {
     return parsed_commands[index];
 }
 
-//bool pdp_processor::reset_operands() {
-//    for(int i = 0; i < OPERANDS_NUMBER; ++i) {
-//        operands[i].val  = 0;
-//        operands[i].adr = 0;
-//        operands[i].res = 0;
-//    }
 
-//    return true;
-//}
+bool pdp_processor::reset() {
+    if(!reset_operands())
+        return false;
+
+    if(!reset_if_byte_flag())
+        return false;
+
+    if(!reset_result())
+        return false;
+
+    if(!reset_curr_instr())
+        return false;
+
+    return true;
+}
 
 
+bool pdp_processor::reset_operands() {
+    for(int i = 0; i < OPERANDS_NUMBER; ++i) {
+        operands[i].val = 0;
+        operands[i].adr = 0;
+        operands[i].res = 0;
+    }
+
+    return true;
+}
+
+
+bool pdp_processor::reset_if_byte_flag() {
+    if_byte_flag = 0;
+    return true;
+}
+
+
+bool pdp_processor::reset_result() {
+    result = 0;
+    return true;
+}
+
+
+bool pdp_processor::reset_curr_instr() {
+    current_instr = 0;
+    return true;
+}
 
 
 /*

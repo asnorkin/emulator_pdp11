@@ -93,3 +93,14 @@ bool pdp::load_program(char *filename) {
 
     return true;
 }
+
+
+bool pdp::reset() {
+    if(!memory->reset())
+        return false;
+
+    if(!processor->reset())
+        return false;
+
+    return true;
+}
