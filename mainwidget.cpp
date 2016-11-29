@@ -72,6 +72,10 @@ void MainWidget::on_pushButton_clicked() //start
             ui->label_16->setText(QString::number(instruction_content -> registers[7]));
             free(instruction_content);
         } while(final.compare(compare));
+        if((pause_pressed != true) && (finish == true)) {
+            ui->pushButton_5->setEnabled(true);
+            ui->lineEdit->setEnabled(true);
+        }
     }
 }
 
@@ -124,6 +128,10 @@ void MainWidget::on_pushButton_2_clicked() // step
         ui->label_16->setText(QString::number(instruction_content -> registers[7]));
         free(instruction_content);
     }
+    if((pause_pressed != true) && (finish == true)) {
+        ui->pushButton_5->setEnabled(true);
+        ui->lineEdit->setEnabled(true);
+    }
 }
 
 void MainWidget::on_pushButton_5_clicked()
@@ -135,4 +143,6 @@ void MainWidget::on_pushButton_5_clicked()
             return;
         }
     file_name = line_str.toStdString();
+    ui->pushButton_5->setEnabled(false);
+    ui->lineEdit->setEnabled(false);
 }
