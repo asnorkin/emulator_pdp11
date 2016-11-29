@@ -5,8 +5,8 @@
 #include <QDialog>
 #include <QtGui>
 #include <QtCore>
-
-
+#include <QTableWidget>
+#include "pdp.h"
 
 namespace Ui {
 class MainWidget;
@@ -34,5 +34,10 @@ private slots:
 private:
     Ui::MainWidget *ui;
 };
+
+void enable_false(Ui::MainWidget *ui);
+void insert_elements_refresh(Ui::MainWidget *ui);
+void free(pdp_status *instance);
+
 
 #endif // MAINWIDGET_H

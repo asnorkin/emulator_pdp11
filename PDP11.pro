@@ -25,7 +25,6 @@ HEADERS  += mainwidget.h \
     data_types.h \
     pdp_memory.h \
     pdp_processor.h \
-    pdp_tester.h \
-    pdp.h
+    pdp_tester.h
 
 FORMS    += mainwidget.ui
