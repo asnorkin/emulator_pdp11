@@ -24,15 +24,8 @@ pdp::pdp() {
 
 
 bool pdp::print_next_instruction() {
-    run_next_instruction();
-
-    //while(curr_stat) {
-        print_status();
-
-        //curr_stat = run_next_instruction();
-    //}
-
-
+    run_next_instruction();    
+    print_status();
 }
 
 
