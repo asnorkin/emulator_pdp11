@@ -79,14 +79,6 @@ pdp_status *pdp::get_pdp_status() {
 }
 
 
-int pdp::run_program() {
-
-
-
-    return 0;
-}
-
-
 bool pdp::load_program(char *filename) {
     ifstream infile(filename);
 

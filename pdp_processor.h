@@ -267,8 +267,8 @@ command commands_list[INSTRUCTIONS_NUMBER] = {
 {64, DOUBLE_REG_OP_MASK,0077000,    "SOB",      &pdp_processor::ex_sob,     HAS_R6|HAS_NN},
 
 //  Trap & Interrupt
-{65, WITHOUT_MASK,      0000000,    "EMP",      &pdp_processor::ex_emt,     NO_PARAM},//TODO: EMT
-{66, WITHOUT_MASK,      0000000,    "TRAP",     &pdp_processor::ex_trap,    NO_PARAM},//TODO: TRAP
+{65, WITHOUT_MASK,      0104000,    "EMP",      &pdp_processor::ex_emt,     NO_PARAM},//TODO: EMT
+{66, WITHOUT_MASK,      0104000,    "TRAP",     &pdp_processor::ex_trap,    NO_PARAM},//TODO: TRAP
 {67, WITHOUT_MASK,      0000003,    "BPT",      &pdp_processor::ex_bpt,     NO_PARAM},
 {68, WITHOUT_MASK,      0000004,    "IOT",      &pdp_processor::ex_iot,     NO_PARAM},
 {69, WITHOUT_MASK,      0000002,    "RTI",      &pdp_processor::ex_rti,     NO_PARAM},
