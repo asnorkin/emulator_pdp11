@@ -346,7 +346,7 @@ bool pdp_processor::reset_if_byte_flag() {
 
 
 bool pdp_processor::reset_result() {
-    result = 0;
+    result = DD;
     return true;
 }
 

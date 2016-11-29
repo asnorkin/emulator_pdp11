@@ -156,7 +156,6 @@ private:
 /*
  *  Reset funcs
  */
-    bool    reset();
     bool    reset_operands();
     bool    reset_if_byte_flag();
     bool    reset_result();
@@ -395,8 +394,9 @@ command commands_list[INSTRUCTIONS_NUMBER] = {
 public:
 
     pdp_processor(pdp_memory *mem);
-    bool process_instruction();
-    string disasm_curr_instr();
+    bool        process_instruction();
+    string      disasm_curr_instr();
+    bool        reset();
 
     //  Just for testing
     command get_command(int index);
