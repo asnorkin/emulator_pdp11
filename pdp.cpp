@@ -80,9 +80,6 @@ pdp_status *pdp::get_pdp_status() {
 
 
 bool pdp::load_program(char *filename) {
-    if(!reset())
-        return false;
-
     ifstream infile(filename);
 
     WORD init_addr = 0, n = 0;
