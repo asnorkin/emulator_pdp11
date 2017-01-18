@@ -1,8 +1,11 @@
 #include "pdp.h"
+
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+#include "utils.h"
+#include "pipeline.h"
 
 
 using std::cout;
@@ -11,14 +14,10 @@ using std::ifstream;
 using std::hex;
 
 
-#define error_exit(msg) do {                    \
-                            perror(msg);        \
-                            exit(EXIT_FAILURE); \
-                        } while (0)
-
 pdp::pdp() {
     memory      = new pdp_memory();
-    processor   = new pdp_processor(memory);
+    pipe        = new pipeline();
+    processor   = new pdp_processor(memory, pipe);
     memory->set_reg_data(PC, 0);
 }
 
@@ -54,6 +53,10 @@ bool pdp::print_status() {
 
     cout << "NZVC : " << ((psw >> 3) & 1) << ((psw >> 2) & 1)
          << ((psw >> 1) & 1) << (psw & 1) << endl;
+
+    cout << "###    INSTRUCTION CACHE   ###" << endl;
+    cout << "# hits   " << curr_stat->icstat.hits << endl;
+    cout << "# misses " << curr_stat->icstat.misses << endl;
 }
 
 
@@ -74,6 +77,7 @@ pdp_status *pdp::get_pdp_status() {
     status->registers = (memory->get_registers_snapshot());
     status->VRAM = (memory->get_VRAM_snapshot());
     status->disasm_command = processor->disasm_curr_instr();
+    status->icstat = processor->get_icstat();
 
     return status;
 }

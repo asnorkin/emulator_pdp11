@@ -1,9 +1,13 @@
 #include "pdp_processor.h"
 
-#include "pdp_memory.h"
-
 #include <cstdlib>
 #include <cstdio>
+#include "utils.h"
+#include "pdp_memory.h"
+#include "pipeline.h"
+#include "clocks.h"
+#include "wb_buffer.h"
+
 
 #define CLEAR_MASK          0000000
 #define CLEARB_MASK         0177400
@@ -11,17 +15,14 @@
 #define SECOND_BYTE_MASK    0177400
 
 
-#define error_exit(msg) do {                    \
-                            perror(msg);        \
-                            exit(EXIT_FAILURE); \
-                        } while (0)
-
-
-
-
-pdp_processor::pdp_processor(pdp_memory *mem)
+pdp_processor::pdp_processor(pdp_memory *mem, pipeline *p)
 {
-    memory = mem;
+    memory  = mem;
+    pipe    = p;
+    cache   = new icache(mem);
+    wb_buf  = new wb_buffer(mem);
+    instruction_counter = -1;   //  For increment in first use and has value 0
+    clock_counter = 0;
 
     if(!parse_commands())
         error_exit("Processor initialization failure: can't parse commands");
@@ -67,10 +68,18 @@ string pdp_processor::disasm_curr_instr() {
 
 bool pdp_processor::process_instruction() {
 
+    instruction_counter++;
+
     if(!instruction_fetch())
         return false;
 
     if(!instruction_decode())
+        return false;
+
+    if(!op1_fetch())
+        return false;
+
+    if(!op2_fetch())
         return false;
 
     if(!execute())
@@ -78,6 +87,14 @@ bool pdp_processor::process_instruction() {
 
     if(!write_back())
         return false;
+
+    //  Some debug
+    pipe->instructions_print();
+    if(!pipe->run())
+        printf("## PAPAPAM ##\n");
+    pipe->pipe_print(0);
+    pipe->print_statistics();
+
 
     return true;
 }
@@ -89,24 +106,70 @@ bool pdp_processor::instruction_fetch() {
     if(!memory->set_reg_data(PC, instr_addr + 2))
         error_exit("Instruction fetch failure: can't increment PC by 2");
 
-    current_instr = memory->w_read(instr_addr);
+    current_instr = cache->get_instr(instr_addr);
 
+    int ifetch_clocks = 0;
+    if(cache->is_missed())
+        ifetch_clocks = MEMORY_ACCESS;
+    else
+        ifetch_clocks = CACHE_ACCESS;
+
+    pipe->istage_push(IFETCH_STAGE, {instruction_counter,
+                                     clock_counter,
+                                     ifetch_clocks,
+                                     {instr_addr}
+                                    });
+    clock_counter += ifetch_clocks;
     return true;
 }
 
 bool pdp_processor::instruction_decode() {
     if_byte_flag = current_instr >> 15;
+    int idecode_clocks = REGISTER_ACCESS;
+    pipe->istage_push(IDECODE_STAGE, {instruction_counter,
+                                      clock_counter,
+                                      idecode_clocks,
+                                      {}
+                                     });
+    clock_counter += idecode_clocks;
+    return true;
+}
 
-    com_processing pc = parsed_commands[current_instr];
 
+bool pdp_processor::op1_fetch() {
     op_type first_op_type = parsed_commands[current_instr].first_op_type;
-    if(parsed_commands[current_instr].first_op_addr_mode != NO_MODE)
+    int op1fetch_clocks = 0;
+    if(parsed_commands[current_instr].first_op_addr_mode != NO_MODE) {
         (this->*parsed_commands[current_instr].get_first_op)(current_instr, first_op_type);
+        op1fetch_clocks = opfetch_clocks[parsed_commands[current_instr].first_op_addr_mode];
+    }
 
+    pipe->istage_push(OP1FETCH_STAGE, {instruction_counter,
+                                       clock_counter,
+                                       op1fetch_clocks,
+                                       pipe->of_get_hp(parsed_commands[current_instr].first_op_addr_mode,
+                                                       operands[first_op_type]),
+                                      });
+    clock_counter += op1fetch_clocks;
+    return true;
+}
+
+
+bool pdp_processor::op2_fetch() {
     op_type second_op_type = parsed_commands[current_instr].second_op_type;
-    if(parsed_commands[current_instr].second_op_addr_mode != NO_MODE)
+    int op2fetch_clocks = 0;
+    if(parsed_commands[current_instr].second_op_addr_mode != NO_MODE) {
         (this->*parsed_commands[current_instr].get_second_op)(current_instr >> 6, second_op_type);
+        op2fetch_clocks = opfetch_clocks[parsed_commands[current_instr].second_op_addr_mode];
+    }
 
+    pipe->istage_push(OP2FETCH_STAGE, {instruction_counter,
+                                       clock_counter,
+                                       op2fetch_clocks,
+                                       pipe->of_get_hp(parsed_commands[current_instr].second_op_addr_mode,
+                                                       operands[second_op_type]),
+                                      });
+    clock_counter += op2fetch_clocks;
     return true;
 }
 
@@ -114,11 +177,45 @@ bool pdp_processor::execute() {
     WORD idx = parsed_commands[current_instr].index;
     (this->*commands_list[idx].ex_func)();
 
+    //  TODO:   add smth for clock count
+    int execute_clocks = 1;
+    if(current_instr == 0x1001)
+        execute_clocks += 9;
+    pipe->istage_push(EXECUTE_STAGE, {instruction_counter,
+                                      clock_counter,
+                                      execute_clocks,
+                                      {}
+                                     });
+    clock_counter += execute_clocks;
+
     return true;
 }
 
 bool pdp_processor::write_back() {    
-    memory->w_write(operands[result].adr, operands[result].val);
+    //memory->w_write(operands[result].adr, operands[result].val);
+    int wb_clocks = 0;
+
+    //  Register is used in place therefore
+    //  wb_clocks is 0
+    if(operands[result].adr >= RAM_SIZE) {
+        memory->w_write(operands[result].adr, operands[result].val);
+        wb_clocks += REGISTER_ACCESS;
+
+    //  Memory write back
+    } else {
+        wb_buf->push({operands[result].adr, operands[result].val});
+        if(wb_buf->was_overflow())
+            wb_clocks += MEMORY_ACCESS;
+        else
+            wb_clocks += CACHE_ACCESS;
+    }
+
+    pipe->istage_push(WRITEBACK_STAGE, {instruction_counter,
+                                        clock_counter,
+                                        wb_clocks,
+                                        {operands[result].adr}
+                                       });
+    clock_counter += wb_clocks;
     return true;
 }
 
@@ -168,14 +265,15 @@ bool pdp_processor::parse_commands() {
             parsed_commands[i].first_op_type    = XX;
         }
 
-        parsed_commands[i].first_op_addr_mode    = first_op_mode;
-        parsed_commands[i].get_first_op     = get_op[first_op_mode];
-        parsed_commands[i].second_op_addr_mode   = second_op_mode;
-        parsed_commands[i].get_second_op    = get_op[second_op_mode];
+        parsed_commands[i].first_op_addr_mode   = first_op_mode;
+        parsed_commands[i].get_first_op         = get_op[first_op_mode];
+        parsed_commands[i].second_op_addr_mode  = second_op_mode;
+        parsed_commands[i].get_second_op        = get_op[second_op_mode];
     }
 
     return true;
 }
+
 
 bool pdp_processor::init_get_op_array() {
     get_op[REGISTER]                =   &pdp_processor::get_reg_op;
@@ -192,7 +290,6 @@ bool pdp_processor::init_get_op_array() {
 }
 
 
-
 void pdp_processor::get_reg_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
     if(reg_number == PC)
@@ -204,6 +301,7 @@ void pdp_processor::get_reg_op(WORD instr, int op_num) {
     operands[op_num].val = memory->get_reg_data(reg_number);
 }
 
+
 void pdp_processor::get_reg_def_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
     if(reg_number == PC)
@@ -214,6 +312,7 @@ void pdp_processor::get_reg_def_op(WORD instr, int op_num) {
     operands[op_num].adr = mem_addr;
     operands[op_num].val = memory->w_read(mem_addr);
 }
+
 
 void pdp_processor::get_autoinc_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
@@ -228,6 +327,7 @@ void pdp_processor::get_autoinc_op(WORD instr, int op_num) {
         memory->set_reg_data(reg_number, mem_addr + 2);
 }
 
+
 void pdp_processor::get_autoinc_def_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
     ADDR mem_addr  = memory->get_reg_data(reg_number);
@@ -237,6 +337,7 @@ void pdp_processor::get_autoinc_def_op(WORD instr, int op_num) {
 
     memory->set_reg_data(reg_number, mem_addr + 2);
 }
+
 
 void pdp_processor::get_autodec_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
@@ -255,6 +356,7 @@ void pdp_processor::get_autodec_op(WORD instr, int op_num) {
     operands[op_num].val = memory->w_read(mem_addr);
 }
 
+
 void pdp_processor::get_autodec_def_op(WORD instr, int op_num) {
     int reg_number = instr & REG_NUMBER_MASK;
     if(reg_number == PC)
@@ -270,6 +372,7 @@ void pdp_processor::get_autodec_def_op(WORD instr, int op_num) {
     operands[op_num].val  = memory->w_read(operands[op_num].adr);
 }
 
+
 void pdp_processor::get_index_op(WORD instr, int op_num) {
     operands[NN].val = memory->w_read(memory->get_reg_data(PC));
     memory->set_reg_data(PC, memory->get_reg_data(PC) + 2);
@@ -281,6 +384,7 @@ void pdp_processor::get_index_op(WORD instr, int op_num) {
     operands[op_num].adr = mem_addr;
     operands[op_num].val = memory->w_read(mem_addr);
 }
+
 
 void pdp_processor::get_index_def_op(WORD instr, int op_num) {
     operands[NN].val = memory->w_read(memory->get_reg_data(PC));
@@ -294,11 +398,11 @@ void pdp_processor::get_index_def_op(WORD instr, int op_num) {
     operands[op_num].val = memory->w_read(operands[op_num].adr);
 }
 
+
 void pdp_processor::get_branch_op(WORD instr, int op_num) {
     operands[op_num].val = instr & OFFSET_MASK;
     operands[op_num].adr = 0;
 }
-
 
 
 pdp_processor::command pdp_processor::get_command(int index) {
@@ -354,6 +458,11 @@ bool pdp_processor::reset_result() {
 bool pdp_processor::reset_curr_instr() {
     current_instr = 0;
     return true;
+}
+
+
+ic_stat_t pdp_processor::get_icstat() {
+    return cache->get_stat();
 }
 
 
@@ -636,8 +745,8 @@ void pdp_processor::ex_cmp() {
 }
 
 void pdp_processor::ex_cmpb() {
-    WORD result = operands[SS].val & FIRST_BYTE_MASK -
-                  operands[DD].val &FIRST_BYTE_MASK;
+    WORD result = (operands[SS].val & FIRST_BYTE_MASK) -
+                  (operands[DD].val & FIRST_BYTE_MASK);
 
     return;
 }

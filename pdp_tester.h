@@ -13,6 +13,7 @@
 
 
 class pdp_memory;
+class pipeline;
 class pdp_processor;
 class pdp;
 
@@ -20,9 +21,10 @@ class pdp;
 class pdp_tester
 {
 private:
-    pdp_memory *mem_test;
-    pdp_processor *proc_test;
-    pdp *pdp_test;
+    pdp_memory      *mem_test;
+    pipeline        *pipe_test;
+    pdp_processor   *proc_test;
+    pdp             *pdp_test;
 
 
 public:
@@ -84,11 +86,6 @@ public:
 
     bool    proc_test_ex_clr();
 
-    /*
-     *
-     *  PDP tests
-     *
-     */
 };
 
 #endif // PDP_TESTER_H

@@ -1,9 +1,13 @@
 #ifndef PDP_PROCESSOR_H
 #define PDP_PROCESSOR_H
 
+
+#include <string>
 #include "data_types.h"
 #include "pdp_tester.h"
-#include <string>
+#include "icache.h"
+#include "clocks.h"
+//#include "pipeline.h"
 
 
 using std::string;
@@ -34,6 +38,9 @@ using std::string;
 
 
 class pdp_memory;
+class icache;
+class pipeline;
+class wb_buffer;
 
 
 typedef enum addr_mode {
@@ -61,10 +68,9 @@ typedef struct disasm_mode {
 typedef struct op {
     //addr_mode   mode;
     WORD        val;    //value
-    ADDR        adr;	//address;  //  TODO: check why does it need
+    ADDR        adr;	//address;
     WORD        res;
 } operand;
-
 
 
 typedef enum operand_type {
@@ -92,7 +98,7 @@ private:
     pdp_memory *memory;
 
 
-    //  Array to store SS, DD, R, XX
+    //  Array to store SS, DD, R, XX, NN
     operand operands[OPERANDS_NUMBER] = {};
 
     //  Slot for saving execution result
@@ -101,8 +107,23 @@ private:
     //  Flag for byte instructions
     bool    if_byte_flag;
 
+    //  Clock counter
+    int     clock_counter;
+
+    //  Instruction counter
+    int     instruction_counter;
+
     //  Current instruction
     WORD    current_instr;
+
+    //  Instruction cache
+    icache  *cache;
+
+    //  Write back buffer
+    wb_buffer   *wb_buf;
+
+    //  Pipeline
+    pipeline    *pipe;
 
 
 /*
@@ -141,6 +162,19 @@ private:
     void    get_index_def_op(WORD instr, int op_num);
     void    get_branch_op(WORD instr, int op_num);
 
+    //  Array of operand fetch clocks
+    int opfetch_clocks[ADDR_MODES_NUMBER] = {
+        REGISTER_ACCESS,
+        MEMORY_ACCESS,
+        MEMORY_ACCESS + ONE_CLOCK,
+        MEMORY_ACCESS + MEMORY_ACCESS + ONE_CLOCK,
+        MEMORY_ACCESS + ONE_CLOCK,
+        MEMORY_ACCESS + MEMORY_ACCESS + ONE_CLOCK,
+        MEMORY_ACCESS + MEMORY_ACCESS_DATA_BUS + ONE_CLOCK,
+        MEMORY_ACCESS + MEMORY_ACCESS + MEMORY_ACCESS_DATA_BUS + ONE_CLOCK,
+        MEMORY_ACCESS
+    };
+
 
 /*
  *
@@ -149,6 +183,8 @@ private:
  */
     bool    instruction_fetch();
     bool    instruction_decode();
+    bool    op1_fetch();
+    bool    op2_fetch();
     bool    execute();
     bool    write_back();
 
@@ -393,20 +429,15 @@ command commands_list[INSTRUCTIONS_NUMBER] = {
 
 public:
 
-    pdp_processor(pdp_memory *mem);
+    pdp_processor(pdp_memory *mem, pipeline *p);
     bool        process_instruction();
     string      disasm_curr_instr();
     bool        reset();
+    ic_stat_t   get_icstat();
 
     //  Just for testing
     command get_command(int index);
     com_processing get_parsed_command(int index);
-
-/* Questions to Artem:
- *  1 How does function definecom() work?
- *  2 Detail algorithm of command parsing
- */
-
 };
 
 #endif // PDP_PROCESSOR_H

@@ -9,9 +9,7 @@
 #define USER_MEM_SIZE           56*KB // TODO: change it
 #define RAM_SIZE                64*KB
 #define VRAM_SIZE               16*KB
-
 #define PSW                     0177776
-
 #define FIRST_BIT_MASK          0000001
 
 typedef enum registers {
@@ -26,6 +24,7 @@ typedef enum registers {
     REGISTERS_NUMBER    = 8
 } registers;
 
+
 typedef enum PSW_flags {
     C   = 0,
     V   = 1,
@@ -34,7 +33,6 @@ typedef enum PSW_flags {
     T   = 4,
     PSW_FLAGS_NUMBER = 5
 } PSW_flags;
-
 
 
 class pdp_memory
