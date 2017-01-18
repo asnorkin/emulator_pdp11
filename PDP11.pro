@@ -10,6 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = PDP11
 TEMPLATE = app
+QMAKE_CXXFLAGS += -std=c++11
 
 
 SOURCES += main.cpp\
@@ -18,7 +19,10 @@ SOURCES += main.cpp\
     pdp_memory.cpp \
     pdp_processor.cpp \
     pdp_tester.cpp \
-    pdp.cpp
+    pdp.cpp \
+    icache.cpp \
+    pipeline.cpp \
+    wb_buffer.cpp
 
 HEADERS  += mainwidget.h \
     image.h \
@@ -26,6 +30,11 @@ HEADERS  += mainwidget.h \
     pdp_memory.h \
     pdp_processor.h \
     pdp_tester.h \
-    pdp.h
+    utils.h \
+    pdp.h \
+    icache.h \
+    pipeline.h \
+    clocks.h \
+    wb_buffer.h
 
 FORMS    += mainwidget.ui

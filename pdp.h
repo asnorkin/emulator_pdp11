@@ -11,6 +11,7 @@ typedef struct pdp_status {
     BYTE *  RAM;
     BYTE *  VRAM;
     string  disasm_command;
+    ic_stat_t icstat;
 } pdp_status;
 
 
@@ -22,6 +23,7 @@ class pdp
 private:
     pdp_processor   *processor;
     pdp_memory      *memory;
+    pipeline        *pipe;
 
 
     pdp_status *get_pdp_status();
@@ -32,7 +34,6 @@ public:
     bool        load_program(char *filename);    
     pdp_status *run_next_instruction();
     bool        reset();
-    //int         run_program();
 
     //  Just for console debugging
     bool        print_next_instruction();
@@ -40,9 +41,5 @@ public:
 
 };
 
-/* Questions to Artem:
- *  1 How does function definecom() work?
- *  2 Detail algorithm of command parsing
- */
 
 #endif // PDP_H

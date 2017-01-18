@@ -1,0 +1,12 @@
+#ifndef CLOCKS_H
+#define CLOCKS_H
+
+#define ONE_CLOCK               1
+#define REGISTER_ACCESS         ONE_CLOCK
+#define CACHE_ACCESS            ONE_CLOCK
+#define MEMORY_ACCESS_ADDR_BUS  5 * ONE_CLOCK
+#define MEMORY_ACCESS_DATA_BUS  5 * ONE_CLOCK
+#define MEMORY_ACCESS           MEMORY_ACCESS_ADDR_BUS + MEMORY_ACCESS_DATA_BUS
+
+
+#endif // CLOCKS_H

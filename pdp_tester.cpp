@@ -3,15 +3,15 @@
 #include <cstdlib>
 #include <iostream>
 #include <iomanip>
-
 #include "data_types.h"
 #include "pdp_memory.h"
+#include "pipeline.h"
 #include "pdp_processor.h"
 #include "pdp.h"
 
 
 #define BREAK_TEST(msg) do{                                     \
-                            printf("BREAK_TEST : %s\n", msg);  \
+                            printf("BREAK_TEST : %s\n", msg);   \
                             exit(EXIT_FAILURE);                 \
                         }while(0)
 
@@ -23,7 +23,8 @@ using std::endl;
 
 pdp_tester::pdp_tester() {
     mem_test = new pdp_memory();
-    proc_test = new pdp_processor(mem_test);
+    pipe_test = new pipeline();
+    proc_test = new pdp_processor(mem_test, pipe_test);
     pdp_test = new pdp();
 }
 
@@ -624,7 +625,7 @@ bool pdp_tester::proc_test_ex_clr() {
             proc_test->operands[DD].val = val;
 
             if(proc_test->operands[DD].val != 0 &&
-               mem_test->get_PSW() & 017 != 004)
+               (mem_test->get_PSW() & 017) != 004)
                 return false;
         }
     }
