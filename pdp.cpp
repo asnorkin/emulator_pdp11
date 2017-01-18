@@ -78,6 +78,10 @@ pdp_status *pdp::get_pdp_status() {
     status->VRAM = (memory->get_VRAM_snapshot());
     status->disasm_command = processor->disasm_curr_instr();
     status->icstat = processor->get_icstat();
+    status->C_flag  =   memory->get_PSW_flag(C);
+    status->V_flag  =   memory->get_PSW_flag(V);
+    status->Z_flag  =   memory->get_PSW_flag(Z);
+    status->N_flag  =   memory->get_PSW_flag(N);
 
     return status;
 }
