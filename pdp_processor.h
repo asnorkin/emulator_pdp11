@@ -190,7 +190,14 @@ private:
 
 
 /*
- *  Reset funcs
+ *      Flags handler
+ */
+    bool    set_flags(op_type op1_type = NO_OPERAND_TYPE,
+                      op_type op2_type = NO_OPERAND_TYPE);
+
+
+/*
+ *      Reset funcs
  */
     bool    reset_operands();
     bool    reset_if_byte_flag();

@@ -12,6 +12,10 @@ typedef struct pdp_status {
     BYTE *  VRAM;
     string  disasm_command;
     ic_stat_t icstat;
+    bool    C_flag;
+    bool    V_flag;
+    bool    Z_flag;
+    bool    N_flag;
 } pdp_status;
 
 

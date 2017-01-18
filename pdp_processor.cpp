@@ -467,6 +467,14 @@ ic_stat_t pdp_processor::get_icstat() {
 
 
 /*
+ *  Flag setting
+ */
+bool pdp_processor::set_flags(op_type op1_type, op_type op2_type) {
+    return true;
+}
+
+
+/*
  *
  *  PDP processor instructions
  *
