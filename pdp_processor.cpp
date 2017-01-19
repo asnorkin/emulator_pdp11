@@ -937,6 +937,8 @@ void pdp_processor::ex_xor() {
 }
 
 void pdp_processor::ex_br() {
+    ADDR prev_PC = memory->get_reg_data(PC);
+    memory->set_reg_data(PC, prev_PC + 2 * operands[XX].val);
     return;
 }
 
