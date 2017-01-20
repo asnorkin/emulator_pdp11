@@ -6,6 +6,7 @@
 #include <QtGui>
 #include <QtCore>
 #include <QTableWidget>
+#include <QGraphicsScene>
 #include "pdp.h"
 
 namespace Ui {
@@ -19,6 +20,8 @@ class MainWidget : public QWidget
 public:
     explicit MainWidget(QWidget *parent = 0);
     ~MainWidget();
+protected:
+    virtual void paintEvent(QPaintEvent *event);
 
 private slots:
     void on_pushButton_clicked();
@@ -41,6 +44,10 @@ private slots:
 
 private:
     Ui::MainWidget *ui;
+    QGraphicsScene *scene;
+    bool pictureSet;
+    int viewWidth;
+    int viewHeight;
 };
 
 void enable_false(Ui::MainWidget *ui);
