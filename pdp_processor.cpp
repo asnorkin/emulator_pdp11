@@ -9,10 +9,11 @@
 #include "wb_buffer.h"
 
 
-#define CLEAR_MASK          0000000
-#define CLEARB_MASK         0177400
-#define FIRST_BYTE_MASK     0000377
-#define SECOND_BYTE_MASK    0177400
+#define CLEAR_MASK                  0000000
+#define CLEARB_MASK                 0177400
+#define FIRST_BYTE_MASK             0000377
+#define SECOND_BYTE_MASK            0177400
+#define SIGN_BIT_MASK               0100000
 
 
 pdp_processor::pdp_processor(pdp_memory *mem, pipeline *p)
@@ -174,6 +175,7 @@ bool pdp_processor::op2_fetch() {
 }
 
 bool pdp_processor::execute() {
+    overflow_free_res = 0;
     WORD idx = parsed_commands[current_instr].index;
     (this->*commands_list[idx].ex_func)();
 
@@ -198,12 +200,12 @@ bool pdp_processor::write_back() {
     //  Register is used in place therefore
     //  wb_clocks is 0
     if(operands[result].adr >= RAM_SIZE) {
-        memory->w_write(operands[result].adr, operands[result].val);
+        memory->w_write(operands[result].adr, operands[result].res);
         wb_clocks += REGISTER_ACCESS;
 
     //  Memory write back
     } else {
-        wb_buf->push({operands[result].adr, operands[result].val});
+        wb_buf->push({operands[result].adr, operands[result].res});
         if(wb_buf->was_overflow())
             wb_clocks += MEMORY_ACCESS;
         else
@@ -469,7 +471,65 @@ ic_stat_t pdp_processor::get_icstat() {
 /*
  *  Flag setting
  */
-bool pdp_processor::set_flags(op_type op1_type, op_type op2_type) {
+bool pdp_processor::set_flags(int c, int v, int z, int n) {
+    //  Gets operand types
+    op_type op1 = parsed_commands[current_instr].first_op_type;
+    op_type op2 = parsed_commands[current_instr].second_op_type;
+    op_type res = result;
+
+    //  Z flag
+    if(z == -1) {
+        bool Z_is_set = (operands[res].res == 0) ? true : false;
+        if(Z_is_set)
+            memory->set_PSW_flag(Z);
+        else
+            memory->clr_PSW_flag(Z);
+
+    } else if(z == 1)
+        memory->set_PSW_flag(Z);
+      else if(z == 0)
+        memory->clr_PSW_flag(Z);
+
+    //  N flag
+    if(n == -1) {
+        bool N_is_set = (operands[res].res & SIGN_BIT_MASK) ? true : false;
+        if(N_is_set)
+            memory->set_PSW_flag(N);
+        else
+            memory->clr_PSW_flag(N);
+
+    } else if(n == 1)
+        memory->set_PSW_flag(N);
+      else if(n == 0)
+        memory->clr_PSW_flag(N);
+
+    //  C flag
+    if(c == -1) {
+        //  TODO: make something
+    } else if(c == 1)
+        memory->set_PSW_flag(C);
+      else if(c == 0)
+        memory->clr_PSW_flag(C);
+
+    //  V flag
+    if(v == -1) {
+        //  Sign bit checking
+        int ovfr_sb = overflow_free_res & SIGN_BIT_MASK;
+        int  res_sb = operands[res].res & SIGN_BIT_MASK;
+        if(ovfr_sb != res_sb)
+            memory->set_PSW_flag(V);
+        //  Bounds checking
+        else if(overflow_free_res > 0177777)
+            memory->set_PSW_flag(V);
+        else
+            memory->clr_PSW_flag(V);
+
+    } else if(v == 1)
+        memory->set_PSW_flag(V);
+      else if(v == 0)
+        memory->clr_PSW_flag(V);
+
+finish:
     return true;
 }
 
@@ -482,155 +542,177 @@ bool pdp_processor::set_flags(op_type op1_type, op_type op2_type) {
 
 
 void pdp_processor::ex_clr() {
-    operands[DD].val &= CLEAR_MASK;
+    operands[DD].res = operands[DD].val & CLEAR_MASK;
     result = DD;
+    set_flags(0, 0, 1, 0);
 
-    memory->clr_PSW_flag(C);
-    memory->clr_PSW_flag(V);
-    memory->set_PSW_flag(Z);
-    memory->clr_PSW_flag(N);
+//    memory->clr_PSW_flag(C);
+//    memory->clr_PSW_flag(V);
+//    memory->set_PSW_flag(Z);
+//    memory->clr_PSW_flag(N);
 }
 
 void pdp_processor::ex_clrb() {
-    operands[DD].val &= CLEARB_MASK;
+    operands[DD].res = operands[DD].val & CLEARB_MASK;
     result = DD;
+    set_flags(0, 0, 1, 0);
 
-    memory->clr_PSW_flag(C);
-    memory->clr_PSW_flag(V);
-    memory->set_PSW_flag(Z);
-    memory->clr_PSW_flag(N);
+//    memory->clr_PSW_flag(C);
+//    memory->clr_PSW_flag(V);
+//    memory->set_PSW_flag(Z);
+//    memory->clr_PSW_flag(N);
 }
 
 void pdp_processor::ex_com() {
-    operands[DD].val = ~operands[DD].val;
+    operands[DD].res = ~operands[DD].val;
     result = DD;
+    set_flags(1, 0);
 
-    memory->set_PSW_flag(C);
-    memory->clr_PSW_flag(V);
-    if(operands[DD].val == 0)
-        memory->set_PSW_flag(Z);
-    if(operands[DD].val >> 15 == 1)
-        memory->set_PSW_flag(N);
-
+//    memory->set_PSW_flag(C);
+//    memory->clr_PSW_flag(V);
+//    if(operands[DD].res == 0)
+//        memory->set_PSW_flag(Z);
+//    if(operands[DD].res >> 15 == 1)
+//        memory->set_PSW_flag(N);
 }
 
 void pdp_processor::ex_comb() {
     WORD first_byte  = ~operands[DD].val & FIRST_BYTE_MASK; //  Change first byte
     WORD second_byte = operands[DD].val & SECOND_BYTE_MASK; //  Don't change second
-    operands[DD].val = first_byte + second_byte;
+    operands[DD].res = first_byte + second_byte;
     result = DD;
 
-    memory->set_PSW_flag(C);
-    memory->clr_PSW_flag(V);
-    if(operands[DD].val == 0)
-        memory->set_PSW_flag(Z);
-    if(operands[DD].val >> 15 == 1)
-        memory->set_PSW_flag(N);
+//    memory->set_PSW_flag(C);
+//    memory->clr_PSW_flag(V);
+//    if(operands[DD].res == 0)
+//        memory->set_PSW_flag(Z);
+//    if(operands[DD].res >> 15 == 1)
+//        memory->set_PSW_flag(N);
+    set_flags(1, 0);
 }
 
 void pdp_processor::ex_inc() {
-    if(operands[DD].val == 0077777)
-        memory->set_PSW_flag(V);
-
-    operands[DD].val++;
+    overflow_free_res = operands[DD].val + 1;
+    operands[DD].res = overflow_free_res;
     result = DD;
+    set_flags(-2);
+//    if(operands[DD].val == 0077777)
+//        memory->set_PSW_flag(V);
 
-    if(operands[DD].val >> 15 ==  1)
-        memory->set_PSW_flag(N);
+//    operands[DD].val++;
+//    result = DD;
 
-    if(operands[DD].val == 0)
-        memory->set_PSW_flag(Z);
+//    if(operands[DD].val >> 15 ==  1)
+//        memory->set_PSW_flag(N);
+
+//    if(operands[DD].val == 0)
+//        memory->set_PSW_flag(Z);
 }
 
 void pdp_processor::ex_incb() {
-    WORD first_byte = operands[DD].val & FIRST_BYTE_MASK;
-    WORD second_byte = operands[DD].val & SECOND_BYTE_MASK;
+//    WORD first_byte = operands[DD].val & FIRST_BYTE_MASK;
+//    WORD second_byte = operands[DD].val & SECOND_BYTE_MASK;
 
-    if(first_byte == 0000177)   // May be it needs to compare with 0377
-        memory->set_PSW_flag(V);
+//    if(first_byte == 0000177)   // May be it needs to compare with 0377
+//        memory->set_PSW_flag(V);
 
-    first_byte++;
-    operands[DD].val = first_byte + second_byte;
-    result = DD;
+//    first_byte++;
+//    operands[DD].val = first_byte + second_byte;
+//    result = DD;
 
-    if(operands[DD].val >> 7 == 1)
-        memory->set_PSW_flag(N);
+//    if(operands[DD].val >> 7 == 1)
+//        memory->set_PSW_flag(N);
 
-    if(operands[DD].val == 0)
-        memory->set_PSW_flag(Z);
+//    if(operands[DD].val == 0)
+//        memory->set_PSW_flag(Z);
 }
 
 void pdp_processor::ex_dec() {
-    if(operands[DD].val == 0100000)
-        memory->set_PSW_flag(V);
+//    if(operands[DD].val == 0100000)
+//        memory->set_PSW_flag(V);
 
-    operands[DD].val--;
+    overflow_free_res = operands[DD].val - 1;
+    operands[DD].res = overflow_free_res;
     result = DD;
+    set_flags(-2);
 
-    if(operands[DD].val >> 15 ==  1)
-        memory->set_PSW_flag(N);
+//    if(operands[DD].val >> 15 ==  1)
+//        memory->set_PSW_flag(N);
 
-    if(operands[DD].val == 0)
-        memory->set_PSW_flag(Z);
+//    if(operands[DD].val == 0)
+//        memory->set_PSW_flag(Z);
 }
 
 void pdp_processor::ex_decb() {
-    WORD first_byte = operands[DD].val & FIRST_BYTE_MASK;
-    WORD second_byte = operands[DD].val & SECOND_BYTE_MASK;
+//    WORD first_byte = operands[DD].val & FIRST_BYTE_MASK;
+//    WORD second_byte = operands[DD].val & SECOND_BYTE_MASK;
 
-    if(first_byte == 0000177)   //  May be it needs to be compared with 377
-        memory->set_PSW_flag(V);
+//    if(first_byte == 0000177)   //  May be it needs to be compared with 377
+//        memory->set_PSW_flag(V);
 
-    first_byte++;
-    operands[DD].val = first_byte + second_byte;
-    result = DD;
+//    first_byte++;
+//    operands[DD].val = first_byte + second_byte;
+//    result = DD;
 
-    if(operands[DD].val >> 7 == 1)
-        memory->set_PSW_flag(N);
+//    if(operands[DD].val >> 7 == 1)
+//        memory->set_PSW_flag(N);
 
-    if(operands[DD].val == 0)
-        memory->set_PSW_flag(Z);
+//    if(operands[DD].val == 0)
+//        memory->set_PSW_flag(Z);
 }
 
 void pdp_processor::ex_neg() {
-    operands[DD].val = -operands[DD].val;
+    operands[DD].res = 0 - operands[DD].val;
     result = DD;
 
-    if(operands[DD].val < 0)
-        memory->set_PSW_flag(N);
+    //  Carry flag
+    int c_flag = 0;
+    if(operands[DD].res != 0)
+        c_flag = 1;
 
-    if(operands[DD].val == 0) {
-        memory->set_PSW_flag(Z);
-        memory->clr_PSW_flag(C);
-    } else
-        memory->set_PSW_flag(C);
+    set_flags(c_flag);
 
-    if(operands[DD].val == 0100000)
-        memory->set_PSW_flag(V);
-    else
-        memory->clr_PSW_flag(V);
+//    if(operands[DD].val < 0)
+//        memory->set_PSW_flag(N);
+
+//    if(operands[DD].val == 0) {
+//        memory->set_PSW_flag(Z);
+//        memory->clr_PSW_flag(C);
+//    } else
+//        memory->set_PSW_flag(C);
+
+//    if(operands[DD].val == 0100000)
+//        memory->set_PSW_flag(V);
+//    else
+//        memory->clr_PSW_flag(V);
 }
 
 void pdp_processor::ex_negb() {
     WORD first_byte = operands[DD].val & FIRST_BYTE_MASK;
     WORD second_byte = operands[DD].val & SECOND_BYTE_MASK;
 
-    first_byte = -first_byte;
-    operands[DD].val = first_byte + second_byte;
+    first_byte = 0 - first_byte;
+    operands[DD].res = first_byte + second_byte;
 
-    if(first_byte < 0)
-        memory->set_PSW_flag(N);
+    int c_flag = 0;
+    if(first_byte != 0)
+        c_flag = 1;
 
-    if(first_byte == 0) {
-        memory->set_PSW_flag(Z);
-        memory->clr_PSW_flag(C);
-    } else
-        memory->set_PSW_flag(C);
+    set_flags(c_flag);
 
-    if(first_byte == 0400)
-        memory->set_PSW_flag(V);
-    else
-        memory->clr_PSW_flag(V);
+//    if(first_byte < 0)
+//        memory->set_PSW_flag(N);
+
+//    if(first_byte == 0) {
+//        memory->set_PSW_flag(Z);
+//        memory->clr_PSW_flag(C);
+//    } else
+//        memory->set_PSW_flag(C);
+
+//    if(first_byte == 0400)
+//        memory->set_PSW_flag(V);
+//    else
+//        memory->clr_PSW_flag(V);
 }
 
 void pdp_processor::ex_tst() {
@@ -698,58 +780,68 @@ void pdp_processor::ex_sxt() {
 }
 
 void pdp_processor::ex_mov() {
-    operands[DD].val = operands[SS].val;
+    operands[DD].res = operands[SS].val;
+    set_flags(-2, 0);
 
-    if(operands[SS].val < 0)
-        memory->set_PSW_flag(N);
-    else
-        memory->clr_PSW_flag(N);
+//    if(operands[SS].val < 0)
+//        memory->set_PSW_flag(N);
+//    else
+//        memory->clr_PSW_flag(N);
 
-    if(operands[SS].val == 0)
-        memory->set_PSW_flag(Z);
-    else
-        memory->clr_PSW_flag(Z);
+//    if(operands[SS].val == 0)
+//        memory->set_PSW_flag(Z);
+//    else
+//        memory->clr_PSW_flag(Z);
 
-    memory->clr_PSW_flag(V);
+//    memory->clr_PSW_flag(V);
 }
 
 void pdp_processor::ex_movb() {     
-    operands[DD].val = operands[SS].val & FIRST_BYTE_MASK;
+    operands[DD].res = operands[SS].val & FIRST_BYTE_MASK;
+    set_flags(-2, 0);
 
-    if((operands[SS].val & FIRST_BYTE_MASK) < 0)
-        memory->set_PSW_flag(N);
-    else
-        memory->clr_PSW_flag(N);
+//    if((operands[SS].val & FIRST_BYTE_MASK) < 0)
+//        memory->set_PSW_flag(N);
+//    else
+//        memory->clr_PSW_flag(N);
 
-    if((operands[SS].val & FIRST_BYTE_MASK) == 0)
-        memory->set_PSW_flag(Z);
-    else
-        memory->clr_PSW_flag(Z);
+//    if((operands[SS].val & FIRST_BYTE_MASK) == 0)
+//        memory->set_PSW_flag(Z);
+//    else
+//        memory->clr_PSW_flag(Z);
 
-    memory->clr_PSW_flag(V);
+//    memory->clr_PSW_flag(V);
 }
 
 void pdp_processor::ex_cmp() {
-    WORD result = operands[SS].val - operands[DD].val;
+    overflow_free_res = operands[SS].val + ~operands[DD].val + 1;
+    operands[DD].res = overflow_free_res;
+    result = DD;
 
-    if(result < 0)
-        memory->set_PSW_flag(N);
-    else
-        memory->clr_PSW_flag(N);
+    int c_flag = 0;
+    if(overflow_free_res > 0177777)
+        c_flag = 1;
 
-    if(result == 0)
-        memory->set_PSW_flag(Z);
-    else
-        memory->clr_PSW_flag(Z);
+    set_flags(c_flag);
 
-    //  TODO: do something better
-    if((operands[SS].val / 2 + operands[SS].val % 2) -
-       (operands[DD].val / 2 + operands[DD].val % 2) > 0177777)
-        memory->set_PSW_flag(V);
-    else
-        memory->clr_PSW_flag(V);
+//    if(result < 0)
+//        memory->set_PSW_flag(N);
+//    else
+//        memory->clr_PSW_flag(N);
 
-    //  TODO: do C flag handling
+//    if(result == 0)
+//        memory->set_PSW_flag(Z);
+//    else
+//        memory->clr_PSW_flag(Z);
+
+//    //  TODO: do something better
+//    if((operands[SS].val / 2 + operands[SS].val % 2) -
+//       (operands[DD].val / 2 + operands[DD].val % 2) > 0177777)
+//        memory->set_PSW_flag(V);
+//    else
+//        memory->clr_PSW_flag(V);
+
+//    //  TODO: do C flag handling
 }
 
 void pdp_processor::ex_cmpb() {

@@ -104,6 +104,9 @@ private:
     //  Slot for saving execution result
     op_type result;
 
+    //  Result without overflow
+    unsigned long overflow_free_res;
+
     //  Flag for byte instructions
     bool    if_byte_flag;
 
@@ -192,8 +195,7 @@ private:
 /*
  *      Flags handler
  */
-    bool    set_flags(op_type op1_type = NO_OPERAND_TYPE,
-                      op_type op2_type = NO_OPERAND_TYPE);
+    bool    set_flags(int c = -1, int v = -1, int z = -1, int n = -1);
 
 
 /*
