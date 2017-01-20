@@ -17,6 +17,8 @@
 bool pause_pressed = false;
 bool started = false;
 bool finish = false;
+bool once_paint = false;
+bool once_refresh = true;
 
 const std::string final = "HALT ";
 std::string file_name = "";
@@ -56,25 +58,32 @@ MainWidget::~MainWidget()
 void MainWidget::paintEvent(QPaintEvent *event)
 {
     if(buffer_ready == true) {
-        //////
-        struct stat buf;
-        stat("pause.rgba", &buf);
+        if((once_paint == false) && (once_refresh == true)){
 
-        unsigned char* buffer = (unsigned char *)calloc(buf.st_size, sizeof(unsigned char));
+            struct stat buf;
+            stat("pause.rgba", &buf);
 
-        int fd = open("pause.rgba", O_RDONLY);
-        pread(fd, buffer, buf.st_size, 0);
-        //close(fd);
+            unsigned char *buffer = (unsigned char *)calloc(buf.st_size, sizeof(unsigned char));
 
-        QImage img(buffer, 256, 256, QImage::Format_RGBA8888);
+            int fd = open("pause.rgba", O_RDONLY);
+            pread(fd, buffer, buf.st_size, 0);
+            //close(fd);
 
-        //////
-        scene->clear();
-        scene->addPixmap(QPixmap::fromImage(img));
-        ui->graphicsView->update();
+            QImage img(buffer, 256, 256, QImage::Format_RGBA8888); //buffer_
+
+            scene->clear();
+            scene->addPixmap(QPixmap::fromImage(img));
+            ui->graphicsView->update();
+            once_paint = true;
+            once_refresh = false;
+        }
     } else {
-        scene->clear();
-        ui->graphicsView->update();
+        if((once_refresh == false) && (once_paint == true)) {
+            scene->clear();
+            ui->graphicsView->update();
+            once_refresh = true;
+            once_paint = false;
+        }
     }
 }
 
@@ -166,7 +175,7 @@ void MainWidget::on_pushButton_clicked() //start
                 buffer_ = instruction_content -> VRAM;
                 buffer_ready = true;
             } else {
-                //free(instruction_content -> VRAM);
+                free(instruction_content -> VRAM);
             }
 
             if(!final.compare(compare)) {
@@ -181,8 +190,6 @@ void MainWidget::on_pushButton_clicked() //start
             newItem_2->setText(QString::number(instruction_content -> registers[7]));
             ui->tableWidget->setItem(num_of_rows-1, 0, newItem_1);
             ui->tableWidget->setItem(num_of_rows-1, 1, newItem_2);
-            //free(instruction_content -> registers);
-            free(instruction_content -> RAM);
             free(instruction_content);
         } while(final.compare(compare));
         if((pause_pressed != true) && (finish == true)) {
@@ -225,7 +232,7 @@ void MainWidget::on_pushButton_2_clicked() // step
             buffer_ = instruction_content -> VRAM;
             buffer_ready = true;
         } else {
-            //free(instruction_content -> VRAM);
+            free(instruction_content -> VRAM);
         }
 
         insert_row(ui);
