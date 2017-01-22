@@ -12,7 +12,7 @@ pdp_memory::pdp_memory()
 
 bool pdp_memory::reset_VRAM() {
     for(int i = 0; i < VRAM_SIZE; ++i)
-        VRAM[i] = 0;
+        RAM[VRAM_OFFSET + i] = 0;
 
     return true;
 }
@@ -76,7 +76,7 @@ BYTE *pdp_memory::get_VRAM_snapshot() {
         return NULL;
 
     for(int i = 0; i < VRAM_SIZE; ++i)
-        snapshot[i] = VRAM[i];
+        snapshot[i] = RAM[i + VRAM_OFFSET];
 
     return snapshot;
 }

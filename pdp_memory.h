@@ -6,11 +6,13 @@
 
 
 #define REG_SIZE                16
-#define USER_MEM_SIZE           56*KB // TODO: change it
 #define RAM_SIZE                64*KB
 #define VRAM_SIZE               16*KB
 #define PSW                     0177776
 #define FIRST_BIT_MASK          0000001
+#define REGISTERS_OFFSET        64000
+#define VRAM_OFFSET             64016
+
 
 typedef enum registers {
     R0                  = 0,
@@ -40,8 +42,16 @@ class pdp_memory
     friend class pdp_tester;
 
 private:
-    BYTE    RAM[RAM_SIZE + REG_SIZE] = {};
-    BYTE    VRAM[VRAM_SIZE] = {};
+    //  RAM structure :
+    //
+    //  80016   -------------------------
+    //          |         VRAM          |
+    //  64016   -------------------------
+    //          |       REGISTERS       |
+    //  64000   -------------------------
+    //          |         RAM           |
+    //      0   -------------------------
+    BYTE    RAM[RAM_SIZE + REG_SIZE + VRAM_SIZE] = {};
 
 public:
     pdp_memory();
