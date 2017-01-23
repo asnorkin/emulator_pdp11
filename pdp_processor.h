@@ -194,6 +194,8 @@ private:
 
 /*
  *      Flags handler
+ *
+ *  NOTE:   this func doesn't touch C flag
  */
     bool    set_flags(int c = -1, int v = -1, int z = -1, int n = -1);
 
