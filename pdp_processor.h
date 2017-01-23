@@ -222,6 +222,7 @@ private:
         // TODO: add more information about command
         void    (pdp_processor::*ex_func) (void);
         WORD    params;
+        int     clocks;
     } command;
 
 command commands_list[INSTRUCTIONS_NUMBER] = {
@@ -229,111 +230,111 @@ command commands_list[INSTRUCTIONS_NUMBER] = {
  *  Single operand instructions
  */
 //  General
-{0,  SINGLE_OP_MASK,    0005000,    "CLR",      &pdp_processor::ex_clr,     HAS_DD},
-{1,  SINGLE_OP_MASK,    0105000,    "CLRB",     &pdp_processor::ex_clrb,    HAS_DD},
-{2,  SINGLE_OP_MASK,    0005100,    "COM",      &pdp_processor::ex_com,     HAS_DD},
-{3,  SINGLE_OP_MASK,    0105100,    "COMB",     &pdp_processor::ex_comb,    HAS_DD},
-{4,  SINGLE_OP_MASK,    0005200,    "INC",      &pdp_processor::ex_inc,     HAS_DD},
-{5,  SINGLE_OP_MASK,    0105200,    "INCB",     &pdp_processor::ex_incb,    HAS_DD},
-{6,  SINGLE_OP_MASK,    0005300,    "DEC",      &pdp_processor::ex_dec,     HAS_DD},
-{7,  SINGLE_OP_MASK,    0105300,    "DECB",     &pdp_processor::ex_decb,    HAS_DD},
-{8,  SINGLE_OP_MASK,    0005400,    "NEG",      &pdp_processor::ex_neg,     HAS_DD},
-{9,  SINGLE_OP_MASK,    0105400,    "NEGB",     &pdp_processor::ex_negb,    HAS_DD},
-{10, SINGLE_OP_MASK,    0005700,    "TST",      &pdp_processor::ex_tst,     HAS_DD},
-{11, SINGLE_OP_MASK,    0105700,    "TSTB",     &pdp_processor::ex_tstb,    HAS_DD},
+{0,  SINGLE_OP_MASK,    0005000,    "CLR",      &pdp_processor::ex_clr,     HAS_DD, 5},
+{1,  SINGLE_OP_MASK,    0105000,    "CLRB",     &pdp_processor::ex_clrb,    HAS_DD, 5},
+{2,  SINGLE_OP_MASK,    0005100,    "COM",      &pdp_processor::ex_com,     HAS_DD, 5},
+{3,  SINGLE_OP_MASK,    0105100,    "COMB",     &pdp_processor::ex_comb,    HAS_DD, 5},
+{4,  SINGLE_OP_MASK,    0005200,    "INC",      &pdp_processor::ex_inc,     HAS_DD, 5},
+{5,  SINGLE_OP_MASK,    0105200,    "INCB",     &pdp_processor::ex_incb,    HAS_DD, 5},
+{6,  SINGLE_OP_MASK,    0005300,    "DEC",      &pdp_processor::ex_dec,     HAS_DD, 5},
+{7,  SINGLE_OP_MASK,    0105300,    "DECB",     &pdp_processor::ex_decb,    HAS_DD, 5},
+{8,  SINGLE_OP_MASK,    0005400,    "NEG",      &pdp_processor::ex_neg,     HAS_DD, 5},
+{9,  SINGLE_OP_MASK,    0105400,    "NEGB",     &pdp_processor::ex_negb,    HAS_DD, 5},
+{10, SINGLE_OP_MASK,    0005700,    "TST",      &pdp_processor::ex_tst,     HAS_DD, 5},
+{11, SINGLE_OP_MASK,    0105700,    "TSTB",     &pdp_processor::ex_tstb,    HAS_DD, 5},
 
 //  Shift and rotate
-{12, SINGLE_OP_MASK,    0006200,    "ASR",      &pdp_processor::ex_asr,     HAS_DD},
-{13, SINGLE_OP_MASK,    0106200,    "ASRB",     &pdp_processor::ex_asrb,    HAS_DD},
-{14, SINGLE_OP_MASK,    0006300,    "ASL",      &pdp_processor::ex_asl,     HAS_DD},
-{15, SINGLE_OP_MASK,    0106300,    "ASLB",     &pdp_processor::ex_aslb,    HAS_DD},
-{16, SINGLE_OP_MASK,    0006000,    "ROR",      &pdp_processor::ex_ror,     HAS_DD},
-{17, SINGLE_OP_MASK,    0106000,    "RORB",     &pdp_processor::ex_rorb,    HAS_DD},
-{18, SINGLE_OP_MASK,    0006100,    "ROL",      &pdp_processor::ex_rol,     HAS_DD},
-{19, SINGLE_OP_MASK,    0106100,    "ROLB",     &pdp_processor::ex_rolb,    HAS_DD},
-{20, SINGLE_OP_MASK,    0000300,    "SWAP",     &pdp_processor::ex_swap,    HAS_DD},
+{12, SINGLE_OP_MASK,    0006200,    "ASR",      &pdp_processor::ex_asr,     HAS_DD, 5},
+{13, SINGLE_OP_MASK,    0106200,    "ASRB",     &pdp_processor::ex_asrb,    HAS_DD, 5},
+{14, SINGLE_OP_MASK,    0006300,    "ASL",      &pdp_processor::ex_asl,     HAS_DD, 5},
+{15, SINGLE_OP_MASK,    0106300,    "ASLB",     &pdp_processor::ex_aslb,    HAS_DD, 5},
+{16, SINGLE_OP_MASK,    0006000,    "ROR",      &pdp_processor::ex_ror,     HAS_DD, 5},
+{17, SINGLE_OP_MASK,    0106000,    "RORB",     &pdp_processor::ex_rorb,    HAS_DD, 5},
+{18, SINGLE_OP_MASK,    0006100,    "ROL",      &pdp_processor::ex_rol,     HAS_DD, 5},
+{19, SINGLE_OP_MASK,    0106100,    "ROLB",     &pdp_processor::ex_rolb,    HAS_DD, 5},
+{20, SINGLE_OP_MASK,    0000300,    "SWAP",     &pdp_processor::ex_swap,    HAS_DD, 5},
 
 //  Multiple Precision
-{21, SINGLE_OP_MASK,    0005500,    "ADC",      &pdp_processor::ex_adc,     HAS_DD},
-{22, SINGLE_OP_MASK,    0105500,    "ADCB",     &pdp_processor::ex_adcb,    HAS_DD},
-{23, SINGLE_OP_MASK,    0005600,    "SBC",      &pdp_processor::ex_sbc,     HAS_DD},
-{24, SINGLE_OP_MASK,    0105600,    "SBCB",     &pdp_processor::ex_sbcb,    HAS_DD},
-{25, SINGLE_OP_MASK,    0006700,    "SXT",      &pdp_processor::ex_sxt,     HAS_DD},
+{21, SINGLE_OP_MASK,    0005500,    "ADC",      &pdp_processor::ex_adc,     HAS_DD, 5},
+{22, SINGLE_OP_MASK,    0105500,    "ADCB",     &pdp_processor::ex_adcb,    HAS_DD, 5},
+{23, SINGLE_OP_MASK,    0005600,    "SBC",      &pdp_processor::ex_sbc,     HAS_DD, 5},
+{24, SINGLE_OP_MASK,    0105600,    "SBCB",     &pdp_processor::ex_sbcb,    HAS_DD, 5},
+{25, SINGLE_OP_MASK,    0006700,    "SXT",      &pdp_processor::ex_sxt,     HAS_DD, 5},
 
 
 /*
  *  Double operand instructions
  */
 //  General
-{26, DOUBLE_OP_MASK,    0010000,    "MOV",      &pdp_processor::ex_mov,     HAS_SS|HAS_DD},
-{27, DOUBLE_OP_MASK,    0110000,    "MOVB",     &pdp_processor::ex_movb,    HAS_SS|HAS_DD},
-{28, DOUBLE_OP_MASK,    0020000,    "CMP",      &pdp_processor::ex_cmp,     HAS_SS|HAS_DD},
-{29, DOUBLE_OP_MASK,    0120000,    "CMPB",     &pdp_processor::ex_cmpb,    HAS_SS|HAS_DD},
-{30, DOUBLE_OP_MASK,    0060000,    "ADD",      &pdp_processor::ex_add,     HAS_SS|HAS_DD},
-{31, DOUBLE_OP_MASK,    0160000,    "SUB",      &pdp_processor::ex_sub,     HAS_SS|HAS_DD},
+{26, DOUBLE_OP_MASK,    0010000,    "MOV",      &pdp_processor::ex_mov,     HAS_SS|HAS_DD, 5},
+{27, DOUBLE_OP_MASK,    0110000,    "MOVB",     &pdp_processor::ex_movb,    HAS_SS|HAS_DD, 5},
+{28, DOUBLE_OP_MASK,    0020000,    "CMP",      &pdp_processor::ex_cmp,     HAS_SS|HAS_DD, 5},
+{29, DOUBLE_OP_MASK,    0120000,    "CMPB",     &pdp_processor::ex_cmpb,    HAS_SS|HAS_DD, 5},
+{30, DOUBLE_OP_MASK,    0060000,    "ADD",      &pdp_processor::ex_add,     HAS_SS|HAS_DD, 5},
+{31, DOUBLE_OP_MASK,    0160000,    "SUB",      &pdp_processor::ex_sub,     HAS_SS|HAS_DD, 5},
 
 //  Logical
-{32, DOUBLE_OP_MASK,    0030000,    "BIT",      &pdp_processor::ex_bit,     HAS_SS|HAS_DD},
-{33, DOUBLE_OP_MASK,    0130000,    "BITB",     &pdp_processor::ex_bitb,    HAS_SS|HAS_DD},
-{34, DOUBLE_OP_MASK,    0040000,    "BIC",      &pdp_processor::ex_bic,     HAS_SS|HAS_DD},
-{35, DOUBLE_OP_MASK,    0140000,    "BICB",     &pdp_processor::ex_bicb,    HAS_SS|HAS_DD},
-{36, DOUBLE_OP_MASK,    0050000,    "BIS",      &pdp_processor::ex_bis,     HAS_SS|HAS_DD},
-{37, DOUBLE_OP_MASK,    0150000,    "BISB",     &pdp_processor::ex_bisb,    HAS_SS|HAS_DD},
+{32, DOUBLE_OP_MASK,    0030000,    "BIT",      &pdp_processor::ex_bit,     HAS_SS|HAS_DD, 5},
+{33, DOUBLE_OP_MASK,    0130000,    "BITB",     &pdp_processor::ex_bitb,    HAS_SS|HAS_DD, 5},
+{34, DOUBLE_OP_MASK,    0040000,    "BIC",      &pdp_processor::ex_bic,     HAS_SS|HAS_DD, 5},
+{35, DOUBLE_OP_MASK,    0140000,    "BICB",     &pdp_processor::ex_bicb,    HAS_SS|HAS_DD, 5},
+{36, DOUBLE_OP_MASK,    0050000,    "BIS",      &pdp_processor::ex_bis,     HAS_SS|HAS_DD, 5},
+{37, DOUBLE_OP_MASK,    0150000,    "BISB",     &pdp_processor::ex_bisb,    HAS_SS|HAS_DD, 5},
 
 //  Register
-{38, DOUBLE_REG_OP_MASK,0070000,    "MUL",      &pdp_processor::ex_mul,     HAS_R6|HAS_DD},
-{39, DOUBLE_REG_OP_MASK,0071000,    "DIV",      &pdp_processor::ex_mul,     HAS_R6|HAS_DD},
-{40, DOUBLE_REG_OP_MASK,0072000,    "ASH",      &pdp_processor::ex_mul,     HAS_R6|HAS_DD},
-{41, DOUBLE_REG_OP_MASK,0073000,    "ASHC",     &pdp_processor::ex_mul,     HAS_R6|HAS_DD},
-{42, DOUBLE_REG_OP_MASK,0074000,    "XOR",      &pdp_processor::ex_mul,     HAS_R6|HAS_DD},
+{38, DOUBLE_REG_OP_MASK,0070000,    "MUL",      &pdp_processor::ex_mul,     HAS_R6|HAS_DD, 5},
+{39, DOUBLE_REG_OP_MASK,0071000,    "DIV",      &pdp_processor::ex_mul,     HAS_R6|HAS_DD, 5},
+{40, DOUBLE_REG_OP_MASK,0072000,    "ASH",      &pdp_processor::ex_mul,     HAS_R6|HAS_DD, 5},
+{41, DOUBLE_REG_OP_MASK,0073000,    "ASHC",     &pdp_processor::ex_mul,     HAS_R6|HAS_DD, 5},
+{42, DOUBLE_REG_OP_MASK,0074000,    "XOR",      &pdp_processor::ex_mul,     HAS_R6|HAS_DD, 5},
 
 /*
  *  Program control
  */
 //  Branch
-{43, BRANCH_MASK,       0000400,    "BR",       &pdp_processor::ex_br,      HAS_XX},
-{44, BRANCH_MASK,       0001000,    "BNE",      &pdp_processor::ex_bne,     HAS_XX},
-{45, BRANCH_MASK,       0001400,    "BEQ",      &pdp_processor::ex_beq,     HAS_XX},
-{46, BRANCH_MASK,       0100000,    "BPL",      &pdp_processor::ex_bpl,     HAS_XX},
-{47, BRANCH_MASK,       0100400,    "BMI",      &pdp_processor::ex_bmi,     HAS_XX},
-{48, BRANCH_MASK,       0102000,    "BVC",      &pdp_processor::ex_bvc,     HAS_XX},
-{49, BRANCH_MASK,       0102400,    "BVS",      &pdp_processor::ex_bvs,     HAS_XX},
-{50, BRANCH_MASK,       0103000,    "BCC",      &pdp_processor::ex_bcc,     HAS_XX},
-{51, BRANCH_MASK,       0103400,    "BCS",      &pdp_processor::ex_bcs,     HAS_XX},
+{43, BRANCH_MASK,       0000400,    "BR",       &pdp_processor::ex_br,      HAS_XX, 5},
+{44, BRANCH_MASK,       0001000,    "BNE",      &pdp_processor::ex_bne,     HAS_XX, 5},
+{45, BRANCH_MASK,       0001400,    "BEQ",      &pdp_processor::ex_beq,     HAS_XX, 5},
+{46, BRANCH_MASK,       0100000,    "BPL",      &pdp_processor::ex_bpl,     HAS_XX, 5},
+{47, BRANCH_MASK,       0100400,    "BMI",      &pdp_processor::ex_bmi,     HAS_XX, 5},
+{48, BRANCH_MASK,       0102000,    "BVC",      &pdp_processor::ex_bvc,     HAS_XX, 5},
+{49, BRANCH_MASK,       0102400,    "BVS",      &pdp_processor::ex_bvs,     HAS_XX, 5},
+{50, BRANCH_MASK,       0103000,    "BCC",      &pdp_processor::ex_bcc,     HAS_XX, 5},
+{51, BRANCH_MASK,       0103400,    "BCS",      &pdp_processor::ex_bcs,     HAS_XX, 5},
 
 //  Signed conditional branch
-{52, BRANCH_MASK,       0002000,    "BGE",      &pdp_processor::ex_bge,     HAS_XX},
-{53, BRANCH_MASK,       0002400,    "BLT",      &pdp_processor::ex_blt,     HAS_XX},
-{54, BRANCH_MASK,       0003000,    "BGT",      &pdp_processor::ex_bgt,     HAS_XX},
-{55, BRANCH_MASK,       0003400,    "BLE",      &pdp_processor::ex_ble,     HAS_XX},
+{52, BRANCH_MASK,       0002000,    "BGE",      &pdp_processor::ex_bge,     HAS_XX, 5},
+{53, BRANCH_MASK,       0002400,    "BLT",      &pdp_processor::ex_blt,     HAS_XX, 5},
+{54, BRANCH_MASK,       0003000,    "BGT",      &pdp_processor::ex_bgt,     HAS_XX, 5},
+{55, BRANCH_MASK,       0003400,    "BLE",      &pdp_processor::ex_ble,     HAS_XX, 5},
 
 //  Unsigned conditional branch
-{56, BRANCH_MASK,       0101000,    "BHI",      &pdp_processor::ex_bhi,     HAS_XX},
-{57, BRANCH_MASK,       0101400,    "BLOS",     &pdp_processor::ex_blos,    HAS_XX},
-{58, BRANCH_MASK,       0103000,    "BHIS",     &pdp_processor::ex_bhis,    HAS_XX},
-{59, BRANCH_MASK,       0103400,    "BLO",      &pdp_processor::ex_blo,     HAS_XX},
+{56, BRANCH_MASK,       0101000,    "BHI",      &pdp_processor::ex_bhi,     HAS_XX, 5},
+{57, BRANCH_MASK,       0101400,    "BLOS",     &pdp_processor::ex_blos,    HAS_XX, 5},
+{58, BRANCH_MASK,       0103000,    "BHIS",     &pdp_processor::ex_bhis,    HAS_XX, 5},
+{59, BRANCH_MASK,       0103400,    "BLO",      &pdp_processor::ex_blo,     HAS_XX, 5},
 
 //  Jump & Subroutine
-{60, SINGLE_OP_MASK,    0000100,    "JMP",      &pdp_processor::ex_jmp,     HAS_DD},
-{61, DOUBLE_REG_OP_MASK,0004000,    "JSR",      &pdp_processor::ex_jsr,     HAS_R6|HAS_DD},
-{62, SINGLE_REG_OP_MASK,0000200,    "RTS",      &pdp_processor::ex_rts,     HAS_R},//Comm parsing defined this as DD not R
-{63, SINGLE_OP_MASK,    0006400,    "MARK",     &pdp_processor::ex_mark,    HAS_NN},// Analogy with above
-{64, DOUBLE_REG_OP_MASK,0077000,    "SOB",      &pdp_processor::ex_sob,     HAS_R6|HAS_NN},
+{60, SINGLE_OP_MASK,    0000100,    "JMP",      &pdp_processor::ex_jmp,     HAS_DD, 5},
+{61, DOUBLE_REG_OP_MASK,0004000,    "JSR",      &pdp_processor::ex_jsr,     HAS_R6|HAS_DD, 5},
+{62, SINGLE_REG_OP_MASK,0000200,    "RTS",      &pdp_processor::ex_rts,     HAS_R, 5},//Comm parsing defined this as DD not R
+{63, SINGLE_OP_MASK,    0006400,    "MARK",     &pdp_processor::ex_mark,    HAS_NN, 5},// Analogy with above
+{64, DOUBLE_REG_OP_MASK,0077000,    "SOB",      &pdp_processor::ex_sob,     HAS_R6|HAS_NN, 5},
 
 //  Trap & Interrupt
-{65, WITHOUT_MASK,      0104000,    "EMP",      &pdp_processor::ex_emt,     NO_PARAM},//TODO: EMT
-{66, WITHOUT_MASK,      0104000,    "TRAP",     &pdp_processor::ex_trap,    NO_PARAM},//TODO: TRAP
-{67, WITHOUT_MASK,      0000003,    "BPT",      &pdp_processor::ex_bpt,     NO_PARAM},
-{68, WITHOUT_MASK,      0000004,    "IOT",      &pdp_processor::ex_iot,     NO_PARAM},
-{69, WITHOUT_MASK,      0000002,    "RTI",      &pdp_processor::ex_rti,     NO_PARAM},
-{70, WITHOUT_MASK,      0000006,    "RTT",      &pdp_processor::ex_rtt,     NO_PARAM},
+{65, WITHOUT_MASK,      0104000,    "EMP",      &pdp_processor::ex_emt,     NO_PARAM, 5},//TODO: EMT
+{66, WITHOUT_MASK,      0104000,    "TRAP",     &pdp_processor::ex_trap,    NO_PARAM, 5},//TODO: TRAP
+{67, WITHOUT_MASK,      0000003,    "BPT",      &pdp_processor::ex_bpt,     NO_PARAM, 5},
+{68, WITHOUT_MASK,      0000004,    "IOT",      &pdp_processor::ex_iot,     NO_PARAM, 5},
+{69, WITHOUT_MASK,      0000002,    "RTI",      &pdp_processor::ex_rti,     NO_PARAM, 5},
+{70, WITHOUT_MASK,      0000006,    "RTT",      &pdp_processor::ex_rtt,     NO_PARAM, 5},
 
 //  Miscellaneous
-{71, WITHOUT_MASK,      0000000,    "HALT",     &pdp_processor::ex_halt,    NO_PARAM},
-{72, WITHOUT_MASK,      0000001,    "WAIT",     &pdp_processor::ex_wait,    NO_PARAM},
-{73, WITHOUT_MASK,      0000005,    "RESET",    &pdp_processor::ex_reset,   NO_PARAM},
-{74, SINGLE_OP_MASK,    0006500,    "MFPI",     &pdp_processor::ex_mfpi,    HAS_DD},
-{75, SINGLE_OP_MASK,    0006600,    "MTPI",     &pdp_processor::ex_mtpi,    HAS_DD},
+{71, WITHOUT_MASK,      0000000,    "HALT",     &pdp_processor::ex_halt,    NO_PARAM, 5},
+{72, WITHOUT_MASK,      0000001,    "WAIT",     &pdp_processor::ex_wait,    NO_PARAM, 5},
+{73, WITHOUT_MASK,      0000005,    "RESET",    &pdp_processor::ex_reset,   NO_PARAM, 5},
+{74, SINGLE_OP_MASK,    0006500,    "MFPI",     &pdp_processor::ex_mfpi,    HAS_DD, 5},
+{75, SINGLE_OP_MASK,    0006600,    "MTPI",     &pdp_processor::ex_mtpi,    HAS_DD, 5},
 };
 
     disasm_mode mode_list[ADDR_MODES_NUMBER] = {
