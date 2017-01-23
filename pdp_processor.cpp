@@ -810,14 +810,20 @@ void pdp_processor::ex_movb() {
 
 void pdp_processor::ex_cmp() {
     overflow_free_res = operands[SS].val - operands[DD].val;
-    operands[DD].res = overflow_free_res;
-    result = DD;
+//    operands[DD].res = overflow_free_res;
+//    result = DD;
 
     int c_flag = 0;
     if(overflow_free_res > 0177777)
         c_flag = 1;
 
+    //  The podgon
+    operands[NN].res = overflow_free_res;
+    result = NN;
     set_flags(c_flag);
+
+    operands[DD].res = operands[DD].val;
+    result = DD;
 
 //    if(result < 0)
 //        memory->set_PSW_flag(N);
