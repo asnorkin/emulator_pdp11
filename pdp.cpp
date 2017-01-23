@@ -18,13 +18,13 @@ pdp::pdp() {
     memory      = new pdp_memory();
     pipe        = new pipeline();
     processor   = new pdp_processor(memory, pipe);
-    memory->set_reg_data(PC, 0);
+    memory->set_reg_data(PC, 01000);
 }
 
 
 bool pdp::print_next_instruction() {
     run_next_instruction();    
-    print_status();
+    //print_status();
 }
 
 
@@ -90,7 +90,7 @@ pdp_status *pdp::get_pdp_status() {
 bool pdp::load_program(char *filename) {
     ifstream infile(filename);
 
-    WORD init_addr = 0, n = 0;
+    WORD init_addr = 01000, n = 0;
     while(infile >> hex >> init_addr >> n) {
         for (int i = 0; i < n; ++i) {
             WORD x = 0;

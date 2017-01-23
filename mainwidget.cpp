@@ -59,17 +59,16 @@ void MainWidget::paintEvent(QPaintEvent *event)
 {
     if(buffer_ready == true) {
         if((once_paint == false) && (once_refresh == true)){
-
             struct stat buf;
-            stat("pause.rgba", &buf);
+            stat("monitor3.rgba", &buf);
 
             unsigned char *buffer = (unsigned char *)calloc(buf.st_size, sizeof(unsigned char));
 
-            int fd = open("pause.rgba", O_RDONLY);
+            int fd = open("monitor3.rgba", O_RDONLY);
             pread(fd, buffer, buf.st_size, 0);
             //close(fd);
 
-            QImage img(buffer, 256, 256, QImage::Format_RGBA8888); //buffer_
+            QImage img(buffer, 64, 64, QImage::Format_RGBA8888_Premultiplied); //buffer_
 
             scene->clear();
             scene->addPixmap(QPixmap::fromImage(img));
