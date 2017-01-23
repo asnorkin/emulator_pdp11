@@ -5,7 +5,7 @@
 #include "data_types.h"
 
 
-#define     WB_BUFFER_SIZE  16
+#define     WB_BUFFER_SIZE  1
 
 
 typedef struct wb_item {

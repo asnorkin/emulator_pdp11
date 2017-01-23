@@ -90,11 +90,11 @@ bool pdp_processor::process_instruction() {
         return false;
 
     //  Some debug
-    pipe->instructions_print();
-    if(!pipe->run())
-        printf("## PAPAPAM ##\n");
-    pipe->pipe_print(0);
-    pipe->print_statistics();
+    //pipe->instructions_print();
+    //if(!pipe->run())
+    //    printf("## PAPAPAM ##\n");
+    //pipe->pipe_print(0);
+    //pipe->print_statistics();
 
 
     return true;
@@ -699,7 +699,7 @@ void pdp_processor::ex_negb() {
         c_flag = 1;
 
     set_flags(c_flag);
-
+    result = DD;
 //    if(first_byte < 0)
 //        memory->set_PSW_flag(N);
 
@@ -716,6 +716,7 @@ void pdp_processor::ex_negb() {
 }
 
 void pdp_processor::ex_tst() {
+
     return;
 }
 
@@ -781,6 +782,7 @@ void pdp_processor::ex_sxt() {
 
 void pdp_processor::ex_mov() {
     operands[DD].res = operands[SS].val;
+    result = DD;
     set_flags(-2, 0);
 
 //    if(operands[SS].val < 0)
@@ -799,6 +801,7 @@ void pdp_processor::ex_mov() {
 void pdp_processor::ex_movb() {     
     operands[DD].res = operands[SS].val & FIRST_BYTE_MASK;
     set_flags(-2, 0);
+    result = DD;
 
 //    if((operands[SS].val & FIRST_BYTE_MASK) < 0)
 //        memory->set_PSW_flag(N);
@@ -814,7 +817,7 @@ void pdp_processor::ex_movb() {
 }
 
 void pdp_processor::ex_cmp() {
-    overflow_free_res = operands[SS].val + ~operands[DD].val + 1;
+    overflow_free_res = operands[SS].val - operands[DD].val;
     operands[DD].res = overflow_free_res;
     result = DD;
 
@@ -943,6 +946,15 @@ void pdp_processor::ex_br() {
 }
 
 void pdp_processor::ex_bne() {
+    if(memory->get_PSW_flag(Z) == 1)
+        return;
+
+    ADDR prev_PC = memory->get_reg_data(PC);
+    int offset = operands[XX].val & ((1 << 7) - 1);
+    if((operands[XX].val & (1 << 7)))
+        offset *= -1;
+
+    memory->set_reg_data(PC, prev_PC + 2 * offset);
     return;
 }
 
