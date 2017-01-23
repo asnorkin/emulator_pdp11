@@ -88,13 +88,13 @@ pdp_status *pdp::get_pdp_status() {
 
 
 bool pdp::load_program(char *filename) {
-    ifstream infile(filename);
+    ifstream infile(filename, std::ifstream::binary);
 
     WORD init_addr = 01000, n = 0;
     while(infile >> hex >> init_addr >> n) {
         for (int i = 0; i < n; ++i) {
             WORD x = 0;
-            infile >> x;
+            infile >> hex >> x;
             memory->w_write(init_addr + 2 * i, x);
         }
     }

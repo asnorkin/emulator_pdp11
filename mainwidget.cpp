@@ -60,16 +60,16 @@ void MainWidget::paintEvent(QPaintEvent *event)
 {
     if(buffer_ready == true) {
         if((once_paint == false) && (once_refresh == true)){
-            struct stat buf;
+            /*struct stat buf;
             stat("monitor3.rgba", &buf);
 
             unsigned char *buffer = (unsigned char *)calloc(buf.st_size, sizeof(unsigned char));
 
             int fd = open("monitor3.rgba", O_RDONLY);
             pread(fd, buffer, buf.st_size, 0);
-            //close(fd);
+            close(fd);*/
 
-            QImage img(buffer, 64, 64, QImage::Format_RGBA8888_Premultiplied); //buffer_
+            QImage img(buffer_, 32, 32, QImage::Format_RGBA8888_Premultiplied); //buffer_
 
             scene->clear();
             scene->addPixmap(QPixmap::fromImage(img));
@@ -91,7 +91,7 @@ void MainWidget::paintEvent(QPaintEvent *event)
 
 
 void free(pdp_status *instance) {
-    delete[] (instance -> registers);
+    //delete[] (instance -> registers);
     delete instance;
 }
 
@@ -165,23 +165,15 @@ void MainWidget::on_pushButton_clicked() //start
 
     pdp_status *instruction_content = NULL;
     std::string compare;
+    BYTE *VRAM_ptr;
     if(finish != true) {
         do {
             if(pause_pressed == true) break;
             instruction_content = pdp_instance.run_next_instruction();
             compare = instruction_content -> disasm_command;
-
-            if(buffer_ready == false) {
-                buffer_ = instruction_content -> VRAM;
-                buffer_ready = true;
-            } else {
-                free(instruction_content -> VRAM);
-            }
-
-            if(!final.compare(compare)) {
-                finish = true;
-            }
-
+            /////////
+            VRAM_ptr = instruction_content -> VRAM;
+            ////
             set_text_in_labels(ui, instruction_content);
             insert_row(ui);
             QTableWidgetItem *newItem_1 = new QTableWidgetItem();
@@ -192,6 +184,17 @@ void MainWidget::on_pushButton_clicked() //start
             ui->tableWidget->setItem(num_of_rows-1, 1, newItem_2);
             free(instruction_content);
         } while(final.compare(compare));
+        //
+
+        if(buffer_ready == false) {
+            buffer_ = VRAM_ptr;
+            buffer_ready = true;
+        }
+
+        //
+        if(!final.compare(compare)) {
+            finish = true;
+        }
         if((pause_pressed != true) && (finish == true)) {
             insert_elements_refresh(ui);
             enable_false(ui);
@@ -227,14 +230,7 @@ void MainWidget::on_pushButton_2_clicked() // step
         if(!final.compare(instruction_content -> disasm_command)) {
             finish = true;
         }
-
-        if(buffer_ready == false) {
-            buffer_ = instruction_content -> VRAM;
-            buffer_ready = true;
-        } else {
-            free(instruction_content -> VRAM);
-        }
-
+    //
         insert_row(ui);
         set_text_in_labels(ui, instruction_content);
         QTableWidgetItem *newItem_1 = new QTableWidgetItem();
@@ -245,6 +241,12 @@ void MainWidget::on_pushButton_2_clicked() // step
         ui->tableWidget->setItem(num_of_rows-1, 1, newItem_2);
         free(instruction_content);
     }
+    //
+    if(buffer_ready == false) {
+        buffer_ = instruction_content -> VRAM;
+        buffer_ready = true;
+    }
+    //
     if(finish == true) {
         insert_elements_refresh(ui);
         enable_false(ui);

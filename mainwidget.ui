@@ -326,9 +326,9 @@
   <widget class="QTableWidget" name="tableWidget">
    <property name="geometry">
     <rect>
-     <x>630</x>
+     <x>590</x>
      <y>10</y>
-     <width>201</width>
+     <width>241</width>
      <height>261</height>
     </rect>
    </property>
@@ -372,9 +372,9 @@
   <widget class="QPushButton" name="pushButton_8">
    <property name="geometry">
     <rect>
-     <x>630</x>
+     <x>590</x>
      <y>290</y>
-     <width>201</width>
+     <width>241</width>
      <height>23</height>
     </rect>
    </property>
