@@ -947,6 +947,11 @@ void pdp_processor::ex_bne() {
 }
 
 void pdp_processor::ex_beq() {
+    if(memory->get_PSW_flag(Z) == 0)
+        return;
+
+    ADDR prev_PC = memory->get_reg_data(PC);
+    memory->set_reg_data(PC, prev_PC + 2 * operands[XX].val);
     return;
 }
 
