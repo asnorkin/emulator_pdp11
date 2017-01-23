@@ -89,14 +89,6 @@ bool pdp_processor::process_instruction() {
     if(!write_back())
         return false;
 
-    //  Some debug
-    //pipe->instructions_print();
-    //if(!pipe->run())
-    //    printf("## PAPAPAM ##\n");
-    //pipe->pipe_print(0);
-    //pipe->print_statistics();
-
-
     return true;
 }
 

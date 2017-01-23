@@ -22,7 +22,7 @@ bool pipeline::istage_push(int stage_number, istage_t stage_info) {
 }
 
 
-bool pipeline::run() {
+bool pipeline::run(bool verbose) {
     if(!pipeline_lazy_init())
         return false;
 
@@ -44,6 +44,11 @@ bool pipeline::run() {
                    pipe[0][WRITEBACK_STAGE].back().duration - 1;
     statistics.without_pipeline_clocks = clk;
     statistics.pipeline_clocks = pipe_clk;
+
+    if(verbose) {
+        instructions_print();
+        pipe_print();
+    }
 
     return true;
 }

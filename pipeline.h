@@ -125,9 +125,9 @@ public:
     pipeline();
 
     bool        istage_push(int stage_number, istage_t stage_info);
-    bool        run();
+    bool        run(bool verbose = false);
     void        instructions_print();
-    void        pipe_print(int pnumber);
+    void        pipe_print(int pnumber = 0);
     void        print_statistics();
     void        print_OFU();
     pstat_t     get_statistics();

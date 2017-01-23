@@ -38,8 +38,8 @@ WORD icache::get_instr(ADDR pc) {
     }
 
     //  Debug
-    std::cout << "# hits   " << stat.hits << std::endl;
-    std::cout << "# misses " << stat.misses << std::endl;
+//    std::cout << "# hits   " << stat.hits << std::endl;
+//    std::cout << "# misses " << stat.misses << std::endl;
 
     int instr_idx = (pc - zero_pc) / 2;
     return cache[instr_idx];
