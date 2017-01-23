@@ -112,3 +112,11 @@ bool pdp::reset() {
 
     return true;
 }
+
+
+pstat_t pdp::run_pipeline() {
+    if(!pipe->run())
+        return {0, 0};
+
+    return pipe->get_statistics();
+}

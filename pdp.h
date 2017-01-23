@@ -38,6 +38,7 @@ public:
     bool        load_program(char *filename);    
     pdp_status *run_next_instruction();
     bool        reset();
+    pstat_t     run_pipeline();
 
     //  Just for console debugging
     bool        print_next_instruction();

@@ -48,12 +48,6 @@ typedef enum istage_name {
 } istage_name_t;
 
 
-typedef struct pipeline_statistics {
-    int pipeline_clocks;
-    int without_pipeline_clocks;
-} pstat_t;
-
-
 typedef struct pipeline_unit_free_clock {
     int unit_number;
     int clock;
