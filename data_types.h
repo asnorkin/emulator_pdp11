@@ -5,6 +5,7 @@
 #define KB          1024
 #define BYTE_SUP    256
 #define WORD_SUP    65536
+#define WORD_SIZE   2
 
 
 typedef unsigned char   BYTE;

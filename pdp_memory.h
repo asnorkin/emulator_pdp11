@@ -8,7 +8,7 @@
 #define REG_SIZE                16
 #define RAM_SIZE                32*KB
 #define VRAM_SIZE               16*KB
-#define PSW                     0177776
+#define PSW                     RAM_SIZE - WORD_SIZE
 #define FIRST_BIT_MASK          0000001
 #define REGISTERS_OFFSET        RAM_SIZE
 #define VRAM_OFFSET             RAM_SIZE + REG_SIZE
