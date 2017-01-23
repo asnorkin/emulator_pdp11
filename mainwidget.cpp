@@ -5,6 +5,7 @@
 
 #include "mainwidget.h"
 #include "ui_mainwidget.h"
+#include "data_types.h"
 #include "pdp.h"
 #include <string>
 #include <cstring>
@@ -349,4 +350,17 @@ void MainWidget::on_pushButton_8_clicked()
     ui->tableWidget->item(row, 0)->setBackgroundColor("white");
     ui->tableWidget->item(row, 1)->setBackgroundColor("white");
     row = -1;
+}
+
+void MainWidget::on_pushButton_9_clicked()
+{
+    pstat_t stat = pdp_instance.run_pipeline();
+    if (!(stat.pipeline_clocks && stat.without_pipeline_clocks)) {
+        ui->label_30->setText(QString("Failed!"));
+        ui->label_31->setText(QString("Failed!"));
+        return;
+    }
+    ui->label_30->setText(QString::number(stat.pipeline_clocks));
+    ui->label_31->setText(QString::number(stat.without_pipeline_clocks));
+    return;
 }
