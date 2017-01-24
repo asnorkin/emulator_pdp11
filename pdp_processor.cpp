@@ -172,9 +172,7 @@ bool pdp_processor::execute() {
     (this->*commands_list[idx].ex_func)();
 
     //  TODO:   add smth for clock count
-    int execute_clocks = 1;
-    if(current_instr == 0x1001)
-        execute_clocks += 9;
+    int execute_clocks = this->commands_list[idx].clocks;
     pipe->istage_push(EXECUTE_STAGE, {instruction_counter,
                                       clock_counter,
                                       execute_clocks,
