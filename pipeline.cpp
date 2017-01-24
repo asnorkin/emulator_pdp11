@@ -194,12 +194,12 @@ int pipeline::get_wb_clock_for_hp(std::vector<ADDR> &hp) {
 
     std::vector<ADDR>::iterator it;
     for(it = hp.begin(); it != hp.end(); ++it) {
-        cout << "hp[" << *it << "]";
+        //cout << "hp[" << *it << "]";
         std::vector<wbop_t>::iterator jt;
         for(jt = wb_buf.begin(); jt != wb_buf.end(); ++jt) {
             if(*it == (*jt).adr) {
                 clocks.push_back((*jt).finish_clock);
-                cout << "clk[" << (*jt).finish_clock << "]";
+                //cout << "clk[" << (*jt).finish_clock << "]";
             }
         }
     }
