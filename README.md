@@ -10,7 +10,6 @@ There are number of components implemented in this emulator. Let's see a big pic
  - CPU
  - Memory
  - GUI
- - Example program
  
 ### CPU
 Core component of emulator.
@@ -65,5 +64,5 @@ Flagss C, V, Z, N, T are implemented.
 GUI supports simple IO, debug and visualisation tools like you are using real PDP or even cool :)
 
 
-### Example program
+## Example program
 There is simple program example which only loads image into VRAM and shows it on the screen.
