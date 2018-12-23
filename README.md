@@ -5,11 +5,12 @@ Legendary PDP 11 architecture emulator written in C++ as a part of Computer Arch
 Full architecture description: [wiki](https://en.wikipedia.org/wiki/PDP-11_architecture)
 
 ## Components
-There are number of components implemented in this emulator. Let's see a big picture and then consider each module in more detail.
-
+There are number of components implemented in this emulator: 
  - CPU
  - Memory
  - GUI
+ 
+Consider each module in more detail.
  
 ### CPU
 Core component of emulator.
@@ -33,7 +34,7 @@ CPU supports 8 operand address modes like real PDP:
  
 Current CPU implementation supports more than a half of real PDP instructions. And other instructions are not implemented just because there wasn't enough time.
  
-Also there is instruction cache and writeback buffer emulation that make significantly performance improvement for real PDP.
+Also there is an instruction cache and writeback buffer emulation that make significant performance improvement for real PDP.
  
 Besides, there is a pipeline like on a any modern CPUs
 
@@ -57,11 +58,11 @@ RAM and VRAM are implemented as sequence of bytes with get, set and reset.
 
 Registers are implemented as set of 8 WORD (2 byte size) registers: R0-R5, SP, PC.
 
-Flagss C, V, Z, N, T are implemented.
+Flags C, V, Z, N, T are implemented.
 
 
 ### GUI
-GUI supports simple IO, debug and visualisation tools like you are using real PDP or even cool :)
+GUI supports a simple IO, debug and visualisation tools like you are using real PDP or even cool :)
 
 
 ## Example program
